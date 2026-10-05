@@ -2,6 +2,10 @@
 
 基于 Spring Boot 3 + MyBatis-Plus + MySQL 8 的后端 + Vue 3 + Element Plus 前端，提供**对局上传、评论、点赞**三大功能。
 
+![主页](docs/screenshots/home.png)
+
+![对局列表](docs/screenshots/records.png)
+
 ## 项目结构
 
 ```
@@ -16,8 +20,12 @@ First-db/
 │   └── src/
 │       ├── api/index.js        # axios 封装 + 全部接口
 │       ├── router/index.js
-│       ├── App.vue             # 导航布局
-│       └── views/              # 登录/列表/详情/上传 四个页面
+│       ├── App.vue             # 全局布局：星空背景 + 顶栏（导航/主题/通知）
+│       ├── components/         # Starfield 星空背景、HeaderActions 顶栏操作（主题+通知）
+│       └── views/              # HomeView 主页 / RecordListView 列表 / RecordDetailView 详情
+│                               # UploadView 上传 / LoginView 登录注册 / ProfileView 个人中心
+│                               # AdminView 管理后台 / UserProfileView 玩家主页
+├── docs/screenshots/           # README 效果截图
 ├── scripts/api-smoke-test.py   # 后端接口冒烟测试（19 项断言）
 └── uploads/                    # 上传文件目录
 ```
