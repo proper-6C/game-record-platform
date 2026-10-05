@@ -12,5 +12,9 @@ public class UserVO {
     private String username;
     private String nickname;
     private String avatar;
+    /** 绑定邮箱（可为 null） */
+    private String email;
+    /** 邮箱是否已验证 */
+    private Boolean emailVerified;
     private String role;
 }

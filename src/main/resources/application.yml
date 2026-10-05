@@ -17,6 +17,17 @@ spring:
     multipart:
       max-file-size: 500MB
       max-request-size: 512MB
+  # ===== 邮件发送（163 SMTP，邮箱验证码绑定/登录） =====
+  # password 填 163 邮箱的「客户端授权码」（邮箱设置->POP3/SMTP/IMAP 开启后生成），不是登录密码
+  mail:
+    host: smtp.163.com
+    port: 465
+    username: proper_6c@163.com
+    password: ${MAIL_AUTH_CODE:}
+    properties:
+      mail.smtp.auth: true
+      mail.smtp.ssl.enable: true
+      mail.smtp.timeout: 10000
 
 # ===== MyBatis-Plus 配置 =====
 mybatis-plus:

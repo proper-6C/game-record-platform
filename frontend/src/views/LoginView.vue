@@ -2,7 +2,7 @@
 import { ref, reactive } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
-import { login, register } from '../api'
+import { login, register, emailLogin, sendEmailCode } from '../api'
 
 const route = useRoute()
 const router = useRouter()
@@ -10,9 +10,32 @@ const activeTab = ref('login')
 const loading = ref(false)
 
 const loginForm = reactive({ username: '', password: '' })
-const regForm = reactive({ username: '', password: '', nickname: '' })
+const regForm = reactive({ username: '', password: '', nickname: '', email: '', code: '' })
+// 邮箱登录：loginMode = 'pwd' 用户名密码 / 'email' 邮箱验证码
+const loginMode = ref('pwd')
+const emailForm = reactive({ email: '', code: '' })
+const sending = ref(false)
 
 async function handleLogin() {
+  if (loginMode.value === 'email') {
+    if (!emailForm.email || !emailForm.code) {
+      ElMessage.warning('请输入邮箱和验证码')
+      return
+    }
+    loading.value = true
+    try {
+      const data = await emailLogin({ ...emailForm })
+      localStorage.setItem('token', data.token)
+      localStorage.setItem('user', JSON.stringify(data.user))
+      window.dispatchEvent(new Event('auth-changed'))
+      ElMessage.success('登录成功')
+      router.push(route.query.redirect || '/')
+    } catch {
+    } finally {
+      loading.value = false
+    }
+    return
+  }
   if (!loginForm.username || !loginForm.password) {
     ElMessage.warning('请输入用户名和密码')
     return
@@ -32,6 +55,24 @@ async function handleLogin() {
   }
 }
 
+async function handleSendCode(target) {
+  // target: 'login' | 'register'
+  const email = target === 'login' ? emailForm.email : regForm.email
+  if (!email) {
+    ElMessage.warning('请先输入邮箱')
+    return
+  }
+  const type = target === 'login' ? 'login' : 'register'
+  sending.value = true
+  try {
+    await sendEmailCode({ email, type })
+    ElMessage.success('验证码已发送，请查收邮件')
+  } catch {
+  } finally {
+    sending.value = false
+  }
+}
+
 async function handleRegister() {
   if (!regForm.username || !regForm.password) {
     ElMessage.warning('请输入用户名和密码')
@@ -39,6 +80,10 @@ async function handleRegister() {
   }
   if (regForm.password.length < 6) {
     ElMessage.warning('密码至少 6 位')
+    return
+  }
+  if (regForm.email && !regForm.code) {
+    ElMessage.warning('填写了邮箱请同时输入验证码')
     return
   }
   loading.value = true
@@ -68,20 +113,48 @@ async function handleRegister() {
       </h2>
       <el-tabs v-model="activeTab">
         <el-tab-pane label="登录" name="login">
+          <!-- 登录方式切换 -->
+          <div class="login-mode">
+            <button
+              type="button"
+              :class="['mode-btn', { active: loginMode === 'pwd' }]"
+              @click="loginMode = 'pwd'"
+            >用户名密码</button>
+            <button
+              type="button"
+              :class="['mode-btn', { active: loginMode === 'email' }]"
+              @click="loginMode = 'email'"
+            >邮箱验证码</button>
+          </div>
           <el-form label-width="0" @submit.prevent="handleLogin">
-            <el-form-item>
-              <el-input v-model="loginForm.username" placeholder="用户名" size="large" clearable />
-            </el-form-item>
-            <el-form-item>
-              <el-input
-                v-model="loginForm.password"
-                placeholder="密码"
-                type="password"
-                size="large"
-                show-password
-                @keyup.enter="handleLogin"
-              />
-            </el-form-item>
+            <template v-if="loginMode === 'pwd'">
+              <el-form-item>
+                <el-input v-model="loginForm.username" placeholder="用户名" size="large" clearable />
+              </el-form-item>
+              <el-form-item>
+                <el-input
+                  v-model="loginForm.password"
+                  placeholder="密码"
+                  type="password"
+                  size="large"
+                  show-password
+                  @keyup.enter="handleLogin"
+                />
+              </el-form-item>
+            </template>
+            <template v-else>
+              <el-form-item>
+                <el-input v-model="emailForm.email" placeholder="已绑定邮箱" size="large" clearable />
+              </el-form-item>
+              <el-form-item>
+                <div class="code-row">
+                  <el-input v-model="emailForm.code" placeholder="6 位验证码" size="large" maxlength="6" @keyup.enter="handleLogin" />
+                  <el-button class="code-btn" size="large" :disabled="sending" @click="handleSendCode('login')">
+                    {{ sending ? '发送中…' : '获取验证码' }}
+                  </el-button>
+                </div>
+              </el-form-item>
+            </template>
             <el-button type="primary" size="large" class="submit" :loading="loading" @click="handleLogin">
               登录
             </el-button>
@@ -103,6 +176,19 @@ async function handleRegister() {
             </el-form-item>
             <el-form-item>
               <el-input v-model="regForm.nickname" placeholder="昵称（可选）" size="large" clearable />
+            </el-form-item>
+            <el-form-item>
+              <div class="code-row">
+                <el-input v-model="regForm.email" placeholder="绑定邮箱（可选，可邮箱登录）" size="large" clearable />
+              </div>
+            </el-form-item>
+            <el-form-item>
+              <div class="code-row">
+                <el-input v-model="regForm.code" placeholder="邮箱验证码" size="large" maxlength="6" @keyup.enter="handleRegister" />
+                <el-button class="code-btn" size="large" :disabled="sending" @click="handleSendCode('register')">
+                  {{ sending ? '发送中…' : '获取验证码' }}
+                </el-button>
+              </div>
             </el-form-item>
             <el-button type="primary" size="large" class="submit" :loading="loading" @click="handleRegister">
               注册
@@ -170,6 +256,63 @@ async function handleRegister() {
 .submit:hover {
   background: linear-gradient(135deg, #c084fc, #22d3ee);
   box-shadow: 0 0 36px rgba(192, 132, 252, 0.55);
+}
+
+/* ===== 登录方式切换 ===== */
+.login-mode {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+  padding: 4px;
+  background: rgba(10, 6, 18, 0.55);
+  border: 1px solid rgba(192, 132, 252, 0.22);
+  border-radius: 10px;
+}
+.mode-btn {
+  flex: 1;
+  padding: 8px 0;
+  border: 0;
+  border-radius: 7px;
+  background: transparent;
+  color: #a99bc9;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.mode-btn:hover {
+  color: #f3eefc;
+}
+.mode-btn.active {
+  background: linear-gradient(135deg, rgba(192, 132, 252, 0.22), rgba(34, 211, 238, 0.22));
+  color: #c084fc;
+  box-shadow: 0 0 14px rgba(192, 132, 252, 0.25);
+}
+.code-row {
+  display: flex;
+  width: 100%;
+  gap: 10px;
+}
+.code-row .el-input {
+  flex: 1;
+}
+.code-btn {
+  background: rgba(192, 132, 252, 0.12);
+  border: 1px solid rgba(192, 132, 252, 0.4);
+  color: #c084fc;
+  font-weight: 600;
+  border-radius: 10px;
+  min-width: 108px;
+}
+.code-btn:hover {
+  background: rgba(192, 132, 252, 0.24);
+  border-color: #c084fc;
+  color: #f3eefc;
+}
+.code-btn.is-disabled {
+  background: rgba(192, 132, 252, 0.08);
+  border-color: rgba(192, 132, 252, 0.25);
+  color: #6f6391;
 }
 
 /* ===== Element Plus 深色适配 ===== */

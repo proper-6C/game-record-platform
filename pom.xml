@@ -63,6 +63,12 @@
             <artifactId>spring-security-crypto</artifactId>
         </dependency>
 
+        <!-- 邮件发送：邮箱验证码绑定/登录（163 SMTP） -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-mail</artifactId>
+        </dependency>
+
         <!-- JWT：无状态登录令牌（重启不失效、带过期时间） -->
         <dependency>
             <groupId>io.jsonwebtoken</groupId>

@@ -87,4 +87,10 @@ export const getUnreadCount = () => http.get('/api/notification/unread-count')
 export const markNotificationRead = (id) => http.post(`/api/notification/${id}/read`)
 export const markAllNotificationsRead = () => http.post('/api/notification/read-all')
 
+// 邮箱绑定 / 邮箱验证码登录
+export const sendEmailCode = (data) => http.post('/api/email/send-code', data)
+export const bindEmail = (data) => http.post('/api/email/bind', data)
+export const unbindEmail = (data) => http.post('/api/email/unbind', data)
+export const emailLogin = (data) => http.post('/api/email/login', data)
+
 export default http

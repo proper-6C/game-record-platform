@@ -1,22 +1,11 @@
 <script setup>
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
-import { Bell, Sunny, Moon } from '@element-plus/icons-vue'
+import { Bell } from '@element-plus/icons-vue'
 import { getNotifications, getUnreadCount, markNotificationRead, markAllNotificationsRead } from '../api'
 
 const router = useRouter()
 const isLoggedIn = computed(() => !!localStorage.getItem('token'))
-
-// 暗色模式（与全局 html.dark 联动）
-const isDark = ref(localStorage.getItem('theme') === 'dark')
-function applyDark(v) {
-  document.documentElement.classList.toggle('dark', v)
-}
-function toggleDark() {
-  isDark.value = !isDark.value
-  applyDark(isDark.value)
-  localStorage.setItem('theme', isDark.value ? 'dark' : 'light')
-}
 
 // 站内通知
 const notifList = ref([])
@@ -98,7 +87,6 @@ function onAuthChanged() {
 }
 
 onMounted(() => {
-  applyDark(isDark.value)
   loadUnread()
   connectSse()
   window.addEventListener('auth-changed', onAuthChanged)
@@ -111,12 +99,6 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <el-tooltip :content="isDark ? '切换亮色模式' : '切换暗色模式'" placement="bottom">
-    <el-icon class="theme-toggle" :size="17" @click="toggleDark">
-      <Sunny v-if="!isDark" />
-      <Moon v-else />
-    </el-icon>
-  </el-tooltip>
   <template v-if="isLoggedIn">
     <el-popover placement="bottom-end" width="330" trigger="click" @show="loadNotifs">
       <template #reference>
@@ -146,20 +128,6 @@ onBeforeUnmount(() => {
 </template>
 
 <style>
-/* 主题切换图标（与全局深色 UI 一致的浅色） */
-.theme-toggle {
-  color: #c9b8f0;
-  cursor: pointer;
-  margin-right: 4px;
-  vertical-align: middle;
-  transition: transform 0.2s ease, color 0.2s ease, text-shadow 0.2s ease;
-}
-.theme-toggle:hover {
-  color: #c084fc;
-  transform: scale(1.15) rotate(8deg);
-  text-shadow: 0 0 10px rgba(192, 132, 252, 0.6);
-}
-
 /* 通知铃铛 */
 .notif-badge {
   margin-left: 10px;
@@ -235,13 +203,19 @@ onBeforeUnmount(() => {
 .notif-item.unread::before {
   content: '';
   position: absolute;
-  left: 6px;
-  top: 16px;
-  width: 8px;
-  height: 8px;
+  left: 7px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 9px;
+  height: 9px;
   border-radius: 50%;
-  background: #f0abfc;
-  box-shadow: 0 0 8px #e879f9;
+  background: radial-gradient(circle at 35% 35%, #fdf4ff, #f0abfc 60%, #e879f9);
+  box-shadow: 0 0 10px #e879f9, 0 0 4px rgba(232, 121, 249, 0.9);
+  animation: unread-dot 2.4s ease-in-out infinite;
+}
+@keyframes unread-dot {
+  0%, 100% { box-shadow: 0 0 8px rgba(232, 121, 249, 0.7), 0 0 3px rgba(232, 121, 249, 0.9); }
+  50% { box-shadow: 0 0 14px rgba(232, 121, 249, 1), 0 0 6px rgba(232, 121, 249, 1); }
 }
 .notif-item.unread .notif-content {
   color: #fdf4ff;

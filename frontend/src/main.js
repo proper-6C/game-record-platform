@@ -4,8 +4,6 @@ import { ElLoading } from 'element-plus'
 import 'element-plus/es/components/message/style/css'
 import 'element-plus/es/components/message-box/style/css'
 import 'element-plus/es/components/loading/style/css'
-// Element Plus 暗色模式变量（html.dark 时生效）
-import 'element-plus/theme-chalk/dark/css-vars.css'
 import './style.css'
 import App from './App.vue'
 import router from './router'

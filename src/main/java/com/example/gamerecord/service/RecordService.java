@@ -32,6 +32,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.IOException;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
@@ -63,6 +64,16 @@ public class RecordService {
     /** 上传对局（图片或视频） */
     public RecordVO upload(RecordUploadDTO dto, MultipartFile file) {
         Long userId = UserContext.require();
+
+        // 每日上传次数限制：每人每天最多上传 2 次
+        LocalDateTime todayStart = LocalDate.now().atStartOfDay();
+        Long todayCount = recordMapper.selectCount(new LambdaQueryWrapper<GameRecord>()
+                .eq(GameRecord::getUserId, userId)
+                .ge(GameRecord::getCreateTime, todayStart));
+        if (todayCount >= 2) {
+            throw new BizException(ResultCode.BAD_REQUEST, "今日上传次数已达上限（每天最多上传 2 次）");
+        }
+
         if (file == null || file.isEmpty()) {
             throw new BizException(ResultCode.BAD_REQUEST, "请选择要上传的文件");
         }

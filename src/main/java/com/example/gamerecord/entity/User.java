@@ -30,6 +30,12 @@ public class User {
     /** 头像URL */
     private String avatar;
 
+    /** 绑定邮箱（唯一） */
+    private String email;
+
+    /** 邮箱是否已验证：0否 1是 */
+    private Integer emailVerified;
+
     /** 角色：user 普通用户 / admin 管理员 */
     private String role;
 

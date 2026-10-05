@@ -1,32 +1,8 @@
 /* ============================================================
    全局霓虹主题：与主页（电竞霓虹）统一
-   亮色 = 浅霓虹（浅紫灰底 + 霓虹紫强调）
-   暗色 = 深霓虹（与主页同款 #0a0612 系，html.dark 由 App.vue 切换）
+   全站固定深色霓虹（#0a0612 系，与主页同款），不再支持亮色切换
    ============================================================ */
 :root {
-  --app-bg: #f4f1fb;
-  --card-bg: #ffffff;
-  --text-main: #2b2438;
-  --text-sub: #6b6480;
-  --border-color: #e4dff2;
-  --soft-bg: #efeaf9;
-  --cover-ph: #e8e3f5;
-  --result-tag-bg: #efeaf9;
-  --nav-bg: #2b2440;
-  --accent: #8b5cf6;
-  --accent-cyan: #0ea5a4;
-
-  /* Element Plus 主色 → 霓虹紫 */
-  --el-color-primary: #8b5cf6;
-  --el-color-primary-light-3: #a88bf9;
-  --el-color-primary-light-5: #c1adfb;
-  --el-color-primary-light-7: #dacbfc;
-  --el-color-primary-light-8: #e6dafd;
-  --el-color-primary-light-9: #f0e9fe;
-  --el-color-primary-dark-2: #7a4bf0;
-}
-
-html.dark {
   --app-bg: #0e081a;
   --card-bg: #151022;
   --text-main: #f3eefc;
@@ -39,6 +15,7 @@ html.dark {
   --accent: #c084fc;
   --accent-cyan: #22d3ee;
 
+  /* Element Plus 主色 → 霓虹紫 */
   --el-color-primary: #c084fc;
   --el-color-primary-light-3: #b273f5;
   --el-color-primary-light-5: #a461ee;
@@ -89,7 +66,6 @@ body {
 .cover-box,
 .logo,
 .notif-icon,
-.theme-toggle,
 .user-info,
 .notif-item {
   cursor: pointer;
@@ -101,8 +77,7 @@ body {
   box-shadow: 0 10px 24px rgba(139, 92, 246, 0.22) !important;
   border-color: rgba(192, 132, 252, 0.55) !important;
 }
-.notif-icon:hover,
-.theme-toggle:hover {
+.notif-icon:hover {
   color: var(--accent);
   transform: scale(1.12);
   text-shadow: 0 0 10px rgba(192, 132, 252, 0.6);

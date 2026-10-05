@@ -38,7 +38,9 @@ public class WebConfig implements WebMvcConfigurer {
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(tokenInterceptor)
                 .addPathPatterns("/api/**")
-                .excludePathPatterns("/api/user/login", "/api/user/register");
+                .excludePathPatterns(
+                        "/api/user/login", "/api/user/register",
+                        "/api/email/send-code", "/api/email/login");
     }
 
     /** 上传文件访问映射：/uploads/xxx.jpg -&gt; 项目根目录/uploads/xxx.jpg */

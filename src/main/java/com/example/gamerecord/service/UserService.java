@@ -38,8 +38,9 @@ public class UserService {
     private final LikeRecordMapper likeRecordMapper;
     private final JwtUtil jwtUtil;
     private final BCryptPasswordEncoder passwordEncoder;
+    private final EmailService emailService;
 
-    /** 注册 */
+    /** 注册（可选绑定邮箱：dto 携带 email + code 时自动验证并绑定） */
     public UserVO register(RegisterDTO dto) {
         Long count = userMapper.selectCount(
                 new LambdaQueryWrapper<User>().eq(User::getUsername, dto.getUsername()));
@@ -47,10 +48,23 @@ public class UserService {
             throw new BizException(com.example.gamerecord.common.ResultCode.BAD_REQUEST, "用户名已存在");
         }
 
+        if (org.springframework.util.StringUtils.hasText(dto.getEmail())) {
+            Long emailCount = userMapper.selectCount(
+                    new LambdaQueryWrapper<User>().eq(User::getEmail, dto.getEmail()));
+            if (emailCount >= 2) {
+                throw new BizException(com.example.gamerecord.common.ResultCode.BAD_REQUEST, "该邮箱已绑定 2 个账号，无法继续绑定");
+            }
+            emailService.verify(dto.getEmail(), dto.getCode());
+        }
+
         User user = new User();
         user.setUsername(dto.getUsername());
         user.setPassword(passwordEncoder.encode(dto.getPassword()));
         user.setNickname(StringUtils.hasText(dto.getNickname()) ? dto.getNickname() : dto.getUsername());
+        if (StringUtils.hasText(dto.getEmail())) {
+            user.setEmail(dto.getEmail());
+            user.setEmailVerified(1);
+        }
         userMapper.insert(user);
         return toVO(user);
     }
@@ -69,6 +83,54 @@ public class UserService {
         data.put("token", token);
         data.put("user", toVO(user));
         return data;
+    }
+
+    /** 邮箱验证码登录：校验验证码后按绑定邮箱找到用户并签发 JWT（同邮箱绑定多个账号时，登录最早绑定的账号） */
+    public Map<String, Object> emailLogin(String email, String code) {
+        emailService.verify(email, code);
+        List<User> users = userMapper.selectList(
+                new LambdaQueryWrapper<User>().eq(User::getEmail, email).orderByAsc(User::getId));
+        if (users.isEmpty()) {
+            throw new BizException(com.example.gamerecord.common.ResultCode.NOT_FOUND, "该邮箱未绑定账号，请先注册或绑定");
+        }
+        User user = users.get(0);
+        String token = jwtUtil.createToken(user.getId());
+        Map<String, Object> data = new HashMap<>();
+        data.put("token", token);
+        data.put("user", toVO(user));
+        // 提示该邮箱绑定的账号数（便于前端展示，登录默认进入最早绑定账号）
+        data.put("boundCount", users.size());
+        return data;
+    }
+
+    /** 绑定邮箱到当前用户（校验验证码 + 最多 2 个账号） */
+    public UserVO bindEmail(Long userId, String email, String code) {
+        Long count = userMapper.selectCount(new LambdaQueryWrapper<User>().eq(User::getEmail, email));
+        if (count >= 2) {
+            throw new BizException(com.example.gamerecord.common.ResultCode.BAD_REQUEST, "该邮箱已绑定 2 个账号，无法继续绑定");
+        }
+        emailService.verify(email, code);
+        User user = userMapper.selectById(userId);
+        if (user == null) {
+            throw new BizException(com.example.gamerecord.common.ResultCode.NOT_FOUND, "用户不存在");
+        }
+        user.setEmail(email);
+        user.setEmailVerified(1);
+        userMapper.updateById(user);
+        return toVO(user);
+    }
+
+    /** 解绑邮箱：email 必须等于当前绑定邮箱，且验证码通过 */
+    public UserVO unbindEmail(Long userId, String email, String code) {
+        User user = userMapper.selectById(userId);
+        if (user == null || !email.equals(user.getEmail())) {
+            throw new BizException(com.example.gamerecord.common.ResultCode.BAD_REQUEST, "邮箱与当前绑定不一致");
+        }
+        emailService.verify(email, code);
+        user.setEmail(null);
+        user.setEmailVerified(0);
+        userMapper.updateById(user);
+        return toVO(user);
     }
 
     /** 按 ID 查询用户 */
@@ -147,6 +209,8 @@ public class UserService {
         vo.setUsername(user.getUsername());
         vo.setNickname(user.getNickname());
         vo.setAvatar(user.getAvatar());
+        vo.setEmail(user.getEmail());
+        vo.setEmailVerified(user.getEmailVerified() != null && user.getEmailVerified() == 1);
         vo.setRole(user.getRole());
         return vo;
     }

@@ -1,7 +1,7 @@
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { getMyInfo, getUserStats, getRecordList, getLikedRecords, deleteRecord } from '../api'
+import { getMyInfo, getUserStats, getRecordList, getLikedRecords, deleteRecord, sendEmailCode, bindEmail, unbindEmail } from '../api'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { VideoPlay, Calendar, Star, ChatDotRound, Trophy } from '@element-plus/icons-vue'
 
@@ -13,6 +13,62 @@ const list = ref([])
 const total = ref(0)
 const loading = ref(false)
 const query = reactive({ page: 1, size: 9 })
+
+// ===== 邮箱绑定 =====
+const emailForm = reactive({ email: '', code: '' })
+const sending = ref(false)
+const binding = ref(false)
+
+async function handleSendBindCode() {
+  if (!emailForm.email) {
+    ElMessage.warning('请先输入邮箱')
+    return
+  }
+  sending.value = true
+  try {
+    await sendEmailCode({ email: emailForm.email, type: 'bind' })
+    ElMessage.success('验证码已发送，请查收邮件')
+  } catch {
+  } finally {
+    sending.value = false
+  }
+}
+
+async function handleBind() {
+  if (!emailForm.email || !emailForm.code) {
+    ElMessage.warning('请输入邮箱和验证码')
+    return
+  }
+  binding.value = true
+  try {
+    const data = await bindEmail({ email: emailForm.email, code: emailForm.code })
+    me.value = data
+    emailForm.email = ''
+    emailForm.code = ''
+    ElMessage.success('邮箱绑定成功，支持邮箱验证码登录')
+  } catch {
+  } finally {
+    binding.value = false
+  }
+}
+
+async function handleUnbind() {
+  if (!emailForm.email || !emailForm.code) {
+    ElMessage.warning('请输入要解绑的邮箱和验证码（验证码将发送到该邮箱）')
+    return
+  }
+  binding.value = true
+  try {
+    const data = await unbindEmail({ email: emailForm.email, code: emailForm.code })
+    me.value = data
+    emailForm.email = ''
+    emailForm.code = ''
+    ElMessage.success('已解绑邮箱')
+  } catch {
+  } finally {
+    binding.value = false
+  }
+}
 
 async function load() {
   loading.value = true
@@ -81,6 +137,46 @@ onMounted(async () => {
           <div class="username">@{{ me.username }}</div>
         </div>
         <el-button class="go-upload" @click="router.push('/upload')">上传新对局</el-button>
+      </div>
+    </el-card>
+
+    <!-- 账号安全：邮箱绑定 -->
+    <el-card shadow="never" class="neo-card">
+      <div class="email-card">
+        <div class="email-head">
+          <span class="email-title">账号安全</span>
+          <el-tag v-if="me.emailVerified" size="small" type="success" effect="plain">邮箱已验证</el-tag>
+        </div>
+        <div class="email-current">
+          <template v-if="me.email">
+            已绑定邮箱：<span class="email-val">{{ me.email }}</span>
+          </template>
+          <template v-else>
+            未绑定邮箱，绑定后可<strong>免密码邮箱验证码登录</strong>
+          </template>
+        </div>
+        <div class="email-ops">
+          <el-input
+            v-model="emailForm.email"
+            :placeholder="me.email ? '输入当前绑定邮箱（解绑）' : '输入要绑定的邮箱'"
+            size="default"
+            class="email-input"
+            clearable
+          />
+          <el-input
+            v-model="emailForm.code"
+            placeholder="6 位验证码"
+            size="default"
+            class="email-input code"
+            maxlength="6"
+          />
+          <el-button class="code-btn" :disabled="sending" @click="handleSendBindCode">
+            {{ sending ? '发送中…' : '获取验证码' }}
+          </el-button>
+          <el-button v-if="me.email" type="danger" plain :loading="binding" @click="handleUnbind">解绑</el-button>
+          <el-button v-else type="primary" class="bind-btn" :loading="binding" @click="handleBind">绑定</el-button>
+        </div>
+        <div class="email-tip">提示：验证码 5 分钟内有效；同一邮箱 60 秒内只能发送一次；一个邮箱最多绑定 2 个账号。</div>
       </div>
     </el-card>
 
@@ -201,6 +297,85 @@ onMounted(async () => {
   display: flex;
   align-items: center;
   gap: 16px;
+}
+/* ===== 账号安全邮箱绑定 ===== */
+.email-card {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.email-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.email-title {
+  font-size: 16px;
+  font-weight: 800;
+  background: linear-gradient(90deg, #c084fc, #22d3ee);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.email-current {
+  color: #a99bc9;
+  font-size: 14px;
+}
+.email-val {
+  color: #f3eefc;
+  font-weight: 600;
+  word-break: break-all;
+}
+.email-ops {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.email-input {
+  flex: 1;
+  min-width: 180px;
+}
+.email-input.code {
+  max-width: 140px;
+}
+.email-input :deep(.el-input__wrapper) {
+  background: rgba(10, 6, 18, 0.55);
+  box-shadow: 0 0 0 1px rgba(192, 132, 252, 0.25) inset;
+  border-radius: 10px;
+}
+.email-input :deep(.el-input__wrapper.is-focus) {
+  box-shadow: 0 0 0 1px #22d3ee inset, 0 0 16px rgba(34, 211, 238, 0.2);
+}
+.email-input :deep(.el-input__inner) {
+  color: #f3eefc;
+  caret-color: #22d3ee;
+}
+.code-btn {
+  background: rgba(192, 132, 252, 0.12);
+  border: 1px solid rgba(192, 132, 252, 0.4);
+  color: #c084fc;
+  font-weight: 600;
+  border-radius: 10px;
+}
+.code-btn:hover {
+  background: rgba(192, 132, 252, 0.24);
+  border-color: #c084fc;
+  color: #f3eefc;
+}
+.bind-btn {
+  background: linear-gradient(135deg, #c084fc, #22d3ee);
+  border: 0;
+  color: #0a0612;
+  font-weight: 700;
+}
+.bind-btn:hover {
+  background: linear-gradient(135deg, #c084fc, #22d3ee);
+  color: #0a0612;
+  box-shadow: 0 0 20px rgba(192, 132, 252, 0.5);
+}
+.email-tip {
+  color: #6f6391;
+  font-size: 12px;
 }
 .avatar {
   background: linear-gradient(135deg, #c084fc, #22d3ee);

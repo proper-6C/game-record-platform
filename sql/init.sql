@@ -14,10 +14,13 @@ CREATE TABLE `user` (
     `password`    VARCHAR(100) NOT NULL COMMENT '密码（BCrypt 加密）',
     `nickname`    VARCHAR(50)  DEFAULT NULL COMMENT '昵称',
     `avatar`      VARCHAR(255) DEFAULT NULL COMMENT '头像URL',
+    `email`       VARCHAR(100) DEFAULT NULL COMMENT '绑定邮箱（可绑定最多2个账号）',
+    `email_verified` TINYINT    NOT NULL DEFAULT 0 COMMENT '邮箱是否已验证：0否 1是',
     `role`        VARCHAR(20)  NOT NULL DEFAULT 'user' COMMENT '角色：user普通用户 / admin管理员',
     `create_time` DATETIME     DEFAULT CURRENT_TIMESTAMP COMMENT '注册时间',
     PRIMARY KEY (`id`),
-    UNIQUE KEY `uk_username` (`username`)
+    UNIQUE KEY `uk_username` (`username`),
+    KEY `idx_email` (`email`)
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COMMENT ='用户表';
 
 -- ---------- 2. 对局记录表 ----------
