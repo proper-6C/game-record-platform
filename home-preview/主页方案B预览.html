@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>游戏对局记录 · 主页方案B预览</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%230a0612'/%3E%3Cpath d='M9 9h14v14H9z' fill='none' stroke='%23c084fc' stroke-width='2'/%3E%3Cpath d='M9 9l14 14M23 9L9 23' stroke='%2322d3ee' stroke-width='2'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="https://miaoda.feishu.cn/fonts/css2?family=Noto+Sans+SC:wght@300;400;500;700;900&display=swap">
+<style>
+:root {
+  --bg: #0a0612;
+  --bg-2: #0e081a;
+  --card: #151022;
+  --card-2: #1c1430;
+  --line: rgba(192, 132, 252, .16);
+  --text: #f3eefc;
+  --text-2: #a99bc9;
+  --text-3: #6f6391;
+  --purple: #c084fc;
+  --cyan: #22d3ee;
+  --ok: #34d399;
+  --bad: #fb7185;
+  --radius: 14px;
+  --maxw: 1160px;
+  --ease: cubic-bezier(.22, 1, .36, 1);
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  background: var(--bg); color: var(--text);
+  font-family: "Noto Sans SC", "Microsoft YaHei", "PingFang SC", sans-serif;
+  font-size: 15px; line-height: 1.7; -webkit-font-smoothing: antialiased; overflow-x: hidden;
+}
+a { color: inherit; text-decoration: none; }
+img { display: block; max-width: 100%; }
+button { font-family: inherit; cursor: pointer; }
+:focus-visible { outline: 2px solid var(--cyan); outline-offset: 2px; }
+
+/* 背景：星点 + 光晕 */
+body::before {
+  content: ""; position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  background:
+    radial-gradient(1000px 620px at 12% -6%, rgba(192,132,252,.16), transparent 60%),
+    radial-gradient(900px 560px at 88% 110%, rgba(34,211,238,.12), transparent 60%);
+}
+.stars { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; will-change: transform; }
+.stars i { position: absolute; border-radius: 50%; }
+/* 远层极细星：微弱呼吸 */
+.stars i.tiny { width: 1px; height: 1px; background: #dfe6f2; opacity: .3; animation: tw 4.5s ease-in-out infinite; }
+/* 中层细星：明显闪烁 */
+.stars i.small { width: 1.7px; height: 1.7px; background: #e8ecf4; opacity: .45; animation: tw 3.4s ease-in-out infinite; }
+/* 快速闪亮点：短促星光 */
+.stars i.spark { width: 2px; height: 2px; background: #f7faff; box-shadow: 0 0 6px 1px rgba(247, 250, 255, .55); animation: tw 1.7s ease-in-out infinite; }
+/* 近层柔焦星：强光晕 + 明显明暗呼吸 */
+.stars i.soft { width: 2.7px; height: 2.7px; opacity: 1; animation: tw 2.8s ease-in-out infinite; }
+.stars i.soft.w { background: #f4f7fc; box-shadow: 0 0 12px 4px rgba(244, 247, 252, .4); }
+.stars i.soft.p { background: #c084fc; box-shadow: 0 0 16px 6px rgba(192, 132, 252, .45); }
+.stars i.soft.c { background: #67e8f9; box-shadow: 0 0 16px 6px rgba(103, 232, 249, .45); }
+/* 闪烁：暗到全亮的明显明暗对比，现代而灵动 */
+@keyframes tw { 0%, 100% { opacity: .1; } 50% { opacity: 1; } }
+
+.wrap { max-width: var(--maxw); margin: 0 auto; padding: 0 24px; position: relative; z-index: 1; }
+section { position: relative; z-index: 1; }
+
+/* 导航 */
+.nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 50;
+  display: flex; align-items: center; justify-content: space-between;
+  height: 68px; padding: 0 28px; transition: background .35s var(--ease), box-shadow .35s var(--ease);
+}
+.nav.scrolled { background: rgba(10, 6, 18, .92); box-shadow: 0 1px 0 var(--line), 0 12px 32px rgba(0,0,0,.4); }
+.nav-logo { display: flex; align-items: center; gap: 12px; font-weight: 900; letter-spacing: .04em; }
+.nav-logo .mark {
+  width: 34px; height: 34px; border-radius: 10px; display: grid; place-items: center;
+  color: #0a0612; font-weight: 900; font-size: 15px;
+  background: linear-gradient(135deg, var(--purple), var(--cyan));
+  box-shadow: 0 0 18px rgba(192,132,252,.55);
+}
+.nav-logo small { color: var(--text-3); font-weight: 400; font-size: 12px; margin-top: 2px; }
+.nav-links { display: flex; align-items: center; gap: 6px; }
+.nav-link {
+  border: 0; background: transparent; color: var(--text-2);
+  font-size: 14px; padding: 8px 14px; border-radius: 10px; transition: color .2s, background .2s, text-shadow .2s;
+}
+.nav-link:hover { color: var(--purple); text-shadow: 0 0 12px rgba(192,132,252,.7); background: rgba(192,132,252,.08); }
+.nav-preview {
+  font-size: 11px; letter-spacing: .08em; color: var(--cyan);
+  border: 1px solid rgba(34,211,238,.4); padding: 3px 10px; border-radius: 999px; margin-left: 10px;
+  text-shadow: 0 0 8px rgba(34,211,238,.5);
+}
+
+/* Hero */
+.hero { position: relative; min-height: 100vh; display: flex; align-items: center; overflow: hidden; }
+.hero-inner { position: relative; z-index: 2; max-width: var(--maxw); margin: 0 auto; padding: 120px 24px 100px; width: 100%; }
+.hero-eyebrow {
+  font-size: 12px; letter-spacing: .34em; color: var(--cyan); margin-bottom: 26px;
+  display: flex; align-items: center; gap: 12px; text-shadow: 0 0 14px rgba(34,211,238,.6);
+}
+.hero-eyebrow::before { content: ""; width: 38px; height: 1px; background: var(--cyan); box-shadow: 0 0 10px var(--cyan); }
+.hero h1 {
+  font-size: clamp(46px, 8.5vw, 100px); font-weight: 900; line-height: 1.1;
+  letter-spacing: .02em; text-wrap: balance;
+}
+.hero h1 .line { display: block; overflow: hidden; }
+.hero h1 .line span {
+  display: block; transform: translateY(112%);
+  background: linear-gradient(92deg, #fff 12%, var(--purple) 52%, var(--cyan) 92%);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+  filter: drop-shadow(0 0 18px rgba(192,132,252,.35));
+  animation: rise .8s var(--ease) forwards;
+}
+.hero h1 .line:nth-child(2) span { animation-delay: .12s; }
+@keyframes rise { to { transform: translateY(0); } }
+.hero-sub { margin-top: 26px; max-width: 560px; color: var(--text-2); font-size: 16px; font-weight: 300; opacity: 0; animation: fade .9s var(--ease) .5s forwards; }
+@keyframes fade { to { opacity: 1; } }
+.hero-cta { display: flex; gap: 14px; margin-top: 40px; flex-wrap: wrap; opacity: 0; animation: fade .9s var(--ease) .66s forwards; }
+.btn {
+  display: inline-flex; align-items: center; gap: 8px; padding: 13px 26px; border-radius: 12px;
+  font-size: 15px; font-weight: 700; border: 1px solid transparent; transition: transform .2s var(--ease), box-shadow .2s, background .2s, color .2s;
+}
+.btn-primary {
+  background: linear-gradient(135deg, var(--purple), var(--cyan)); color: #0a0612;
+  box-shadow: 0 0 26px rgba(192,132,252,.35);
+}
+.btn-primary:hover { transform: translateY(-2px); box-shadow: 0 0 40px rgba(192,132,252,.55); }
+.btn-ghost { border-color: rgba(192,132,252,.4); color: var(--text); background: rgba(192,132,252,.06); }
+.btn-ghost:hover { border-color: var(--cyan); color: var(--cyan); transform: translateY(-2px); box-shadow: 0 0 24px rgba(34,211,238,.25); }
+.hero-ticker {
+  margin-top: 54px; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line);
+  padding: 12px 0; overflow: hidden; white-space: nowrap; opacity: 0; animation: fade .9s var(--ease) .8s forwards;
+}
+.hero-ticker .tick { display: inline-block; animation: marquee 26s linear infinite; }
+.hero-ticker span { margin-right: 56px; color: var(--text-2); font-size: 13px; }
+.hero-ticker b { color: var(--purple); font-weight: 700; margin-right: 8px; }
+@keyframes marquee { to { transform: translateX(-50%); } }
+
+/* 区块 */
+.sec { padding: 104px 0; }
+.sec-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 20px; margin-bottom: 44px; }
+.sec-head .kicker { font-size: 12px; letter-spacing: .3em; color: var(--purple); margin-bottom: 12px; text-shadow: 0 0 10px rgba(192,132,252,.5); }
+.sec-head h2 {
+  font-size: clamp(26px, 4vw, 38px); font-weight: 900; letter-spacing: .02em;
+  background: linear-gradient(90deg, var(--text) 30%, var(--purple) 70%, var(--cyan));
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+.sec-head p { color: var(--text-2); font-weight: 300; font-size: 14px; max-width: 380px; }
+.sec-more { color: var(--cyan); font-size: 14px; white-space: nowrap; background: none; border: 0; display: inline-flex; align-items: center; gap: 6px; }
+.sec-more:hover svg { transform: translateX(4px); }
+.sec-more svg { transition: transform .25s var(--ease); }
+.reveal { opacity: 0; transform: translateY(26px); transition: opacity .7s var(--ease), transform .7s var(--ease); }
+.reveal.in { opacity: 1; transform: none; }
+
+/* 精选卡片（霓虹 hover） */
+.feature-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
+.f-card {
+  position: relative; border-radius: var(--radius); overflow: hidden;
+  background: var(--card); border: 1px solid var(--line);
+  transition: transform .25s var(--ease), border-color .25s, box-shadow .25s;
+}
+.f-card:hover {
+  transform: translateY(-6px); border-color: rgba(192,132,252,.6);
+  box-shadow: 0 0 30px rgba(192,132,252,.28), 0 18px 40px rgba(0,0,0,.4);
+}
+.f-cover { position: relative; aspect-ratio: 16 / 10; overflow: hidden; }
+.f-cover img { width: 100%; height: 100%; object-fit: cover; transition: transform .6s var(--ease); }
+.f-card:hover .f-cover img { transform: scale(1.06); }
+.f-cover::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, transparent 45%, rgba(10,6,18,.9)); }
+.f-badge {
+  position: absolute; top: 14px; left: 14px; z-index: 2;
+  font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 999px;
+  background: rgba(10,6,18,.75); border: 1px solid var(--line);
+}
+.f-badge.win { color: var(--ok); border-color: rgba(52,211,153,.45); text-shadow: 0 0 8px rgba(52,211,153,.5); }
+.f-badge.lose { color: var(--bad); border-color: rgba(251,113,133,.45); text-shadow: 0 0 8px rgba(251,113,133,.5); }
+.f-badge.video { display: inline-flex; align-items: center; gap: 5px; color: var(--text); }
+.f-badge.video::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--cyan); box-shadow: 0 0 8px var(--cyan); }
+.f-body { padding: 16px 18px 18px; }
+.f-game { font-size: 12px; color: var(--purple); font-weight: 700; letter-spacing: .05em; text-shadow: 0 0 8px rgba(192,132,252,.4); }
+.f-title { font-size: 17px; font-weight: 700; margin: 4px 0 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.f-foot { display: flex; align-items: center; justify-content: space-between; color: var(--text-3); font-size: 12.5px; }
+.f-user { display: flex; align-items: center; gap: 8px; }
+.f-avatar { width: 24px; height: 24px; border-radius: 50%; background: linear-gradient(135deg, var(--purple), var(--cyan)); color: #0a0612; font-size: 11px; font-weight: 900; display: grid; place-items: center; }
+.f-nums { display: flex; gap: 14px; font-variant-numeric: tabular-nums; }
+.f-nums i { font-style: normal; display: inline-flex; align-items: center; gap: 5px; }
+.f-nums svg { opacity: .8; }
+
+/* 平台数据（霓虹数字） */
+#stats { background: var(--bg-2); border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+.stat-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
+.stat { padding: 34px 28px; border-radius: var(--radius); background: var(--card); border: 1px solid var(--line); position: relative; overflow: hidden; }
+.stat::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: linear-gradient(180deg, var(--purple), var(--cyan)); box-shadow: 0 0 14px rgba(192,132,252,.6); }
+.stat .num {
+  font-size: clamp(30px, 4vw, 44px); font-weight: 900; font-variant-numeric: tabular-nums;
+  background: linear-gradient(180deg, #fff, var(--purple)); -webkit-background-clip: text; background-clip: text; color: transparent;
+  filter: drop-shadow(0 0 14px rgba(192,132,252,.3));
+}
+.stat .num em { font-style: normal; font-size: .6em; font-weight: 700; color: var(--text-3); filter: none; -webkit-text-fill-color: var(--text-3); }
+.stat .lab { margin-top: 6px; color: var(--text-2); font-size: 14px; }
+.stat .cap { margin-top: 16px; height: 4px; border-radius: 4px; background: rgba(148,163,184,.1); overflow: hidden; }
+.stat .cap i { display: block; height: 100%; width: 0; border-radius: 4px; background: linear-gradient(90deg, var(--purple), var(--cyan)); box-shadow: 0 0 10px rgba(192,132,252,.6); transition: width 1.4s var(--ease); }
+
+/* 英雄榜 */
+.rank-list { display: grid; gap: 12px; }
+.rank-row2 {
+  display: grid; grid-template-columns: 76px 1fr 1fr 130px; align-items: center; gap: 16px;
+  padding: 18px 22px; border-radius: var(--radius); background: var(--card); border: 1px solid var(--line);
+  transition: transform .2s var(--ease), border-color .2s, box-shadow .2s;
+}
+.rank-row2:hover { transform: translateX(6px); border-color: rgba(192,132,252,.5); box-shadow: 0 0 24px rgba(192,132,252,.15); }
+.rank-no { font-size: 30px; font-weight: 900; color: transparent; -webkit-text-stroke: 1.5px var(--purple); font-variant-numeric: tabular-nums; }
+.rank-no.top1 { color: var(--cyan); -webkit-text-stroke: 0; text-shadow: 0 0 18px rgba(34,211,238,.6); }
+.rank-user { display: flex; align-items: center; gap: 14px; }
+.rank-user .ava { width: 38px; height: 38px; border-radius: 50%; background: linear-gradient(135deg, var(--purple), var(--cyan)); color: #0a0612; font-weight: 900; display: grid; place-items: center; box-shadow: 0 0 12px rgba(192,132,252,.4); }
+.rank-user b { font-size: 16px; font-weight: 700; }
+.rank-user small { display: block; color: var(--text-3); font-size: 12px; }
+.rank-game { color: var(--text-2); font-size: 14px; }
+.rank-likes { font-size: 14px; color: var(--text-2); text-align: right; font-variant-numeric: tabular-nums; }
+.rank-likes b { color: var(--purple); font-weight: 900; font-size: 18px; }
+
+/* 页脚 */
+.foot { border-top: 1px solid var(--line); padding: 56px 0 40px; color: var(--text-3); font-size: 13px; }
+.foot-grid { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 32px; margin-bottom: 36px; }
+.foot h4 { color: var(--text); font-size: 14px; font-weight: 700; margin-bottom: 14px; }
+.foot a { display: block; padding: 5px 0; color: var(--text-3); }
+.foot a:hover { color: var(--purple); }
+.foot .note { color: var(--text-3); font-weight: 300; max-width: 360px; margin-top: 12px; }
+.foot-bar { border-top: 1px solid var(--line); padding-top: 22px; display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.foot-bar .tag { font-size: 11px; color: var(--cyan); border: 1px solid rgba(34,211,238,.35); border-radius: 999px; padding: 2px 10px; }
+
+/* Toast */
+.toast {
+  position: fixed; left: 50%; bottom: 40px; transform: translate(-50%, 80px);
+  background: var(--card-2); border: 1px solid rgba(192,132,252,.45); color: var(--text);
+  padding: 12px 22px; border-radius: 12px; font-size: 14px;
+  box-shadow: 0 0 30px rgba(192,132,252,.25); opacity: 0;
+  transition: transform .4s var(--ease), opacity .4s; z-index: 99; pointer-events: none;
+}
+.toast.show { transform: translate(-50%, 0); opacity: 1; }
+
+/* 响应式 */
+@media (max-width: 1080px) {
+  .feature-grid { grid-template-columns: repeat(2, 1fr); }
+  .stat-grid { grid-template-columns: repeat(2, 1fr); }
+  .rank-row2 { grid-template-columns: 64px 1fr 100px; }
+  .rank-game { display: none; }
+}
+@media (max-width: 640px) {
+  .nav { padding: 0 16px; }
+  .nav-links .nav-link { display: none; }
+  .nav-preview { display: none; }
+  .hero-inner { padding-top: 100px; }
+  .sec { padding: 72px 0; }
+  .sec-head { flex-direction: column; align-items: flex-start; }
+  .feature-grid { grid-template-columns: 1fr; }
+  .stat-grid { grid-template-columns: 1fr 1fr; }
+  .rank-row2 { grid-template-columns: 48px 1fr; grid-template-rows: auto auto; }
+  .rank-likes { grid-column: 2; text-align: left; }
+  .foot-grid { grid-template-columns: 1fr; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+  .hero h1 .line span, .hero-sub, .hero-cta, .hero-ticker { transform: none; opacity: 1; }
+  .reveal { opacity: 1; transform: none; }
+}
+</style>
+</head>
+<body>
+<span class="stars" id="stars" aria-hidden="true"></span>
+
+<!-- ===== 导航 ===== -->
+<nav class="nav" id="nav">
+  <a class="nav-logo" href="#top" data-toast>
+    <span class="mark">GR</span>
+    <span>游戏对局记录<small style="display:block">GAME RECORD CENTER</small></span>
+  </a>
+  <div class="nav-links">
+    <button class="nav-link" data-toast>全部对局</button>
+    <button class="nav-link" data-toast>上传对局</button>
+    <button class="nav-link" data-toast>个人中心</button>
+    <span class="nav-preview">方案B预览</span>
+  </div>
+</nav>
+
+<!-- ===== Hero ===== -->
+<header class="hero" id="top">
+  <div class="hero-inner">
+    <div class="hero-eyebrow">GAME RECORD CENTER</div>
+    <h1>
+      <span class="line"><span>每一局，</span></span>
+      <span class="line"><span>都是高光时刻</span></span>
+    </h1>
+    <p class="hero-sub">霓虹灯下的对局档案馆——上传你的名场面，让全场为你亮灯。点赞、评论、冲榜，把战绩点亮成社区的热度。</p>
+    <div class="hero-cta">
+      <button class="btn btn-primary" data-toast>进入战场
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+      </button>
+      <button class="btn btn-ghost" data-toast>上传对局</button>
+    </div>
+    <div class="hero-ticker">
+      <div class="tick" id="tick">
+        <span><b>player1</b>上传了对局《三角洲行动 · 烽火地带》</span>
+        <span><b>tester01</b>上传了对局《无畏契约 · 爆能决胜》</span>
+        <span><b>admin2</b>点赞了《寒夜挽歌》</span>
+        <span><b>player1</b>评论了《废墟防线》</span>
+        <span><b>tester01</b>上传了对局《英雄联盟 · 峡谷巅峰》</span>
+        <span><b>admin2</b>冲上了本周热榜第 3</span>
+        <span><b>player1</b>上传了对局《三角洲行动 · 红隼桥》</span>
+        <span><b>tester01</b>点赞了《残局一打三》</span>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- ===== 精选对局 ===== -->
+<section class="sec" id="featured">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <div>
+        <div class="kicker">FEATURED</div>
+        <h2>精选对局</h2>
+      </div>
+      <button class="sec-more" data-toast>查看全部
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+      </button>
+    </div>
+    <div class="feature-grid">
+      <article class="f-card reveal">
+        <div class="f-cover"><span class="f-badge video">视频对局</span><img src="assets/coverA.jpg" alt="三角洲行动 烽火地带"></div>
+        <div class="f-body">
+          <div class="f-game">三角洲行动 · 烽火地带</div>
+          <div class="f-title">废墟防线，最后三分钟翻盘</div>
+          <div class="f-foot">
+            <span class="f-user"><span class="f-avatar">P</span>player1</span>
+            <span class="f-nums"><i><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l2.7 5.5 6.1.9-4.4 4.3 1 6-5.4-2.9-5.4 2.9 1-6L2.6 9.4l6.1-.9z"/></svg>2.4k</i><i><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.4 8.4 0 0 1-8.5 8.3c-1.2 0-2.4-.3-3.4-.8L3 20l1.1-5.7A8 8 0 1 1 21 11.5z"/></svg>386</i></span>
+          </div>
+        </div>
+      </article>
+      <article class="f-card reveal">
+        <div class="f-cover"><span class="f-badge win">胜利</span><img src="assets/cover2.jpg" alt="无畏契约 爆能决胜"></div>
+        <div class="f-body">
+          <div class="f-game">无畏契约 · 爆能决胜</div>
+          <div class="f-title">残局一打三，拆包绝杀</div>
+          <div class="f-foot">
+            <span class="f-user"><span class="f-avatar">T</span>tester01</span>
+            <span class="f-nums"><i><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l2.7 5.5 6.1.9-4.4 4.3 1 6-5.4-2.9-5.4 2.9 1-6L2.6 9.4l6.1-.9z"/></svg>1.9k</i><i><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.4 8.4 0 0 1-8.5 8.3c-1.2 0-2.4-.3-3.4-.8L3 20l1.1-5.7A8 8 0 1 1 21 11.5z"/></svg>214</i></span>
+          </div>
+        </div>
+      </article>
+      <article class="f-card reveal">
+        <div class="f-cover"><span class="f-badge win">胜利</span><img src="assets/coverC.jpg" alt="英雄联盟 峡谷巅峰"></div>
+        <div class="f-body">
+          <div class="f-game">英雄联盟 · 峡谷巅峰</div>
+          <div class="f-title">寒夜挽歌，五杀收官</div>
+          <div class="f-foot">
+            <span class="f-user"><span class="f-avatar">P</span>player1</span>
+            <span class="f-nums"><i><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l2.7 5.5 6.1.9-4.4 4.3 1 6-5.4-2.9-5.4 2.9 1-6L2.6 9.4l6.1-.9z"/></svg>3.1k</i><i><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.4 8.4 0 0 1-8.5 8.3c-1.2 0-2.4-.3-3.4-.8L3 20l1.1-5.7A8 8 0 1 1 21 11.5z"/></svg>520</i></span>
+          </div>
+        </div>
+      </article>
+      <article class="f-card reveal">
+        <div class="f-cover"><span class="f-badge lose">败北</span><img src="assets/coverD.jpg" alt="三角洲行动 红隼桥"></div>
+        <div class="f-body">
+          <div class="f-game">三角洲行动 · 红隼桥</div>
+          <div class="f-title">高光集锦：桥头对狙</div>
+          <div class="f-foot">
+            <span class="f-user"><span class="f-avatar">A</span>admin2</span>
+            <span class="f-nums"><i><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l2.7 5.5 6.1.9-4.4 4.3 1 6-5.4-2.9-5.4 2.9 1-6L2.6 9.4l6.1-.9z"/></svg>862</i><i><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.4 8.4 0 0 1-8.5 8.3c-1.2 0-2.4-.3-3.4-.8L3 20l1.1-5.7A8 8 0 1 1 21 11.5z"/></svg>97</i></span>
+          </div>
+        </div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 平台数据 ===== -->
+<section class="sec" id="stats">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <div>
+        <div class="kicker">PLATFORM</div>
+        <h2>平台数据</h2>
+      </div>
+      <p>霓虹之下，社区的每一次跳动都有记录。</p>
+    </div>
+    <div class="stat-grid">
+      <div class="stat reveal"><div class="num"><span data-count="12846">0</span><em> 局</em></div><div class="lab">已上传对局</div><div class="cap"><i data-width="82"></i></div></div>
+      <div class="stat reveal"><div class="num"><span data-count="36520">0</span><em> 次</em></div><div class="lab">累计点赞</div><div class="cap"><i data-width="64"></i></div></div>
+      <div class="stat reveal"><div class="num"><span data-count="8214">0</span><em> 条</em></div><div class="lab">累计评论</div><div class="cap"><i data-width="48"></i></div></div>
+      <div class="stat reveal"><div class="num"><span data-count="3109">0</span><em> 位</em></div><div class="lab">注册玩家</div><div class="cap"><i data-width="36"></i></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 本周英雄榜 ===== -->
+<section class="sec" id="rank">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <div>
+        <div class="kicker">HALL OF FAME</div>
+        <h2>本周英雄榜</h2>
+      </div>
+      <button class="sec-more" data-toast>完整榜单
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+      </button>
+    </div>
+    <div class="rank-list">
+      <div class="rank-row2 reveal"><div class="rank-no top1">01</div><div class="rank-user"><span class="ava">P</span><span><b>player1</b><small>三角洲行动 · 王牌</small></span></div><div class="rank-game">本周 12 局全胜</div><div class="rank-likes"><b data-count="3280">0</b> 获赞</div></div>
+      <div class="rank-row2 reveal"><div class="rank-no">02</div><div class="rank-user"><span class="ava">T</span><span><b>tester01</b><small>无畏契约 · 神射手</small></span></div><div class="rank-game">本周 9 局 8 胜</div><div class="rank-likes"><b data-count="2510">0</b> 获赞</div></div>
+      <div class="rank-row2 reveal"><div class="rank-no">03</div><div class="rank-user"><span class="ava">A</span><span><b>admin2</b><small>英雄联盟 · 钻石</small></span></div><div class="rank-game">本周 7 局 6 胜</div><div class="rank-likes"><b data-count="1890">0</b> 获赞</div></div>
+      <div class="rank-row2 reveal"><div class="rank-no">04</div><div class="rank-user"><span class="ava">W</span><span><b>wanderer</b><small>王者荣耀 · 星耀</small></span></div><div class="rank-game">本周 6 局 5 胜</div><div class="rank-likes"><b data-count="1420">0</b> 获赞</div></div>
+      <div class="rank-row2 reveal"><div class="rank-no">05</div><div class="rank-user"><span class="ava">N</span><span><b>nightowl</b><small>三角洲行动 · 传奇</small></span></div><div class="rank-game">本周 5 局 4 胜</div><div class="rank-likes"><b data-count="960">0</b> 获赞</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 页脚 ===== -->
+<footer class="foot">
+  <div class="wrap">
+    <div class="foot-grid">
+      <div>
+        <div class="nav-logo"><span class="mark">GR</span><span>游戏对局记录</span></div>
+        <p class="note">玩家社区对局档案馆：上传、评论、点赞，留住每一场精彩。</p>
+      </div>
+      <div>
+        <h4>快速入口</h4>
+        <a href="#featured" data-toast>精选对局</a>
+        <a href="#stats" data-toast>平台数据</a>
+        <a href="#rank" data-toast>英雄榜</a>
+      </div>
+      <div>
+        <h4>关于</h4>
+        <a href="#" data-toast>使用说明</a>
+        <a href="#" data-toast>反馈建议</a>
+        <a href="#" data-toast>管理员入口</a>
+      </div>
+    </div>
+    <div class="foot-bar">
+      <span>© 2026 游戏对局记录 · 毕业设计项目</span>
+      <span class="tag">方案B · 电竞霓虹 · 预览版</span>
+    </div>
+  </div>
+</footer>
+
+<div class="toast" id="toast">演示预览：该入口将在正式版中生效</div>
+
+<script>
+(function () {
+  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* 现代星空：细碎星点 + 柔焦光晕，无流星无十字 */
+  var stars = document.getElementById('stars');
+  var html = '';
+  var i, x, y, d;
+  /* 极细远层星 */
+  for (i = 0; i < 96; i++) {
+    x = Math.random() * 100; y = Math.random() * 100; d = Math.random() * 7;
+    html += '<i class="tiny" style="left:' + x.toFixed(1) + '%;top:' + y.toFixed(1) + '%;animation-delay:-' + d.toFixed(2) + 's"></i>';
+  }
+  /* 细层星 */
+  for (i = 0; i < 36; i++) {
+    x = Math.random() * 100; y = Math.random() * 100; d = Math.random() * 3.4;
+    html += '<i class="small" style="left:' + x.toFixed(1) + '%;top:' + y.toFixed(1) + '%;animation-delay:-' + d.toFixed(2) + 's"></i>';
+  }
+  /* 快速闪亮点：节奏明快的星芒 */
+  for (i = 0; i < 16; i++) {
+    x = Math.random() * 100; y = Math.random() * 100; d = Math.random() * 1.7;
+    html += '<i class="spark" style="left:' + x.toFixed(1) + '%;top:' + y.toFixed(1) + '%;animation-delay:-' + d.toFixed(2) + 's"></i>';
+  }
+  /* 柔焦光晕星（白/紫/青各 2 颗，散布在画面非中心） */
+  var soft = [[14, 16, 'w'], [84, 12, 'c'], [78, 70, 'p'], [20, 76, 'w'], [44, 8, 'p'], [90, 42, 'c']];
+  for (i = 0; i < soft.length; i++) {
+    x = soft[i][0] + Math.random() * 6; y = soft[i][1] + Math.random() * 8; d = Math.random() * 4.5;
+    html += '<i class="soft ' + soft[i][2] + '" style="left:' + x.toFixed(1) + '%;top:' + y.toFixed(1) + '%;animation-delay:-' + d.toFixed(2) + 's"></i>';
+  }
+  stars.innerHTML = html;
+
+  /* 星空滚动视差：星星层随滚动缓慢上移，增强景深感 */
+  if (!reduce) {
+    function starParallax() { stars.style.transform = 'translateY(' + (window.scrollY * 0.12).toFixed(1) + 'px)'; }
+    window.addEventListener('scroll', starParallax, { passive: true });
+    starParallax();
+  }
+
+  var nav = document.getElementById('nav');
+  function onScroll() { nav.classList.toggle('scrolled', window.scrollY > 40); }
+  window.addEventListener('scroll', onScroll, { passive: true });
+  onScroll();
+
+  var revealEls = document.querySelectorAll('.reveal');
+  if (reduce || !('IntersectionObserver' in window)) {
+    revealEls.forEach(function (el) { el.classList.add('in'); });
+  } else {
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } });
+    }, { threshold: 0.12 });
+    revealEls.forEach(function (el) { io.observe(el); });
+  }
+
+  function animateCount(el, target, dur) {
+    var t0 = performance.now();
+    function step(t) {
+      var p = Math.min(1, (t - t0) / dur);
+      var ease = 1 - Math.pow(1 - p, 3);
+      el.textContent = Math.round(target * ease).toLocaleString('en-US');
+      if (p < 1) requestAnimationFrame(step);
+    }
+    requestAnimationFrame(step);
+  }
+  function triggerCounts() {
+    document.querySelectorAll('.stat .num span[data-count]').forEach(function (el) {
+      if (el.dataset.done) return;
+      el.dataset.done = '1';
+      animateCount(el, parseInt(el.getAttribute('data-count'), 10), 1400);
+    });
+    document.querySelectorAll('[data-width]').forEach(function (el) {
+      if (!el.dataset.done) { el.dataset.done = '1'; el.style.width = el.getAttribute('data-width') + '%'; }
+    });
+    document.querySelectorAll('.rank-likes b[data-count]').forEach(function (el) {
+      if (el.dataset.done) return;
+      el.dataset.done = '1';
+      animateCount(el, parseInt(el.getAttribute('data-count'), 10), 1200);
+    });
+  }
+  var statsSec = document.getElementById('stats');
+  if (reduce) {
+    document.querySelectorAll('[data-count]').forEach(function (el) { el.textContent = parseInt(el.getAttribute('data-count'), 10).toLocaleString('en-US'); });
+    document.querySelectorAll('[data-width]').forEach(function (el) { el.style.width = el.getAttribute('data-width') + '%'; });
+  } else if ('IntersectionObserver' in window) {
+    var io2 = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) { if (e.isIntersecting) { triggerCounts(); io2.disconnect(); } });
+    }, { threshold: 0.3 });
+    io2.observe(statsSec);
+  } else { triggerCounts(); }
+
+  /* 跑马灯：复制内容保证无缝 */
+  var tick = document.getElementById('tick');
+  if (tick) tick.innerHTML += tick.innerHTML;
+
+  var toast = document.getElementById('toast');
+  var toastTimer = null;
+  function showToast() {
+    toast.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { toast.classList.remove('show'); }, 2200);
+  }
+  document.querySelectorAll('[data-toast]').forEach(function (el) {
+    el.addEventListener('click', function (e) { e.preventDefault(); showToast(); });
+  });
+})();
+</script>
+</body>
+</html>

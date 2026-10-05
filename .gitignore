@@ -1,0 +1,32 @@
+# ===== Maven =====
+target/
+!.mvn/wrapper/maven-wrapper.jar
+!**/src/main/**/target/
+!**/src/test/**/target/
+
+# ===== 前端构建 =====
+frontend/node_modules/
+frontend/dist/
+
+# ===== IDE =====
+.idea/
+*.iml
+.vscode/
+*.classpath
+*.project
+.settings/
+
+# ===== 运行数据 =====
+# 上传的文件（本地运行目录）
+uploads/
+# 日志
+*.log
+*.err.log
+
+# ===== 截图等过程产物 =====
+home-preview/_shots/
+_shots/
+
+# ===== OS =====
+.DS_Store
+Thumbs.db

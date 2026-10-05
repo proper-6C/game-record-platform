@@ -1,0 +1,57 @@
+# 一键容器化部署（Docker + Docker Compose）
+# 用法：
+#   1) 构建前端：cd frontend && npm install && npm run build
+#   2) cd deploy
+#   3) docker compose up -d
+# 访问：http://localhost （前端）；API 由 nginx 转发到 backend:8080
+#
+# MySQL 如需容器化，取消下面 mysql 服务注释，并同步修改
+# backend 环境变量中的 DB_HOST/DB_PORT/DB_PASSWORD。
+
+services:
+  backend:
+    build:
+      context: ..
+      dockerfile: deploy/backend.Dockerfile
+    container_name: game-record-backend
+    environment:
+      - DB_HOST=host.docker.internal   # 复用宿主机 MySQL；容器化 MySQL 时改为 mysql
+      - DB_PORT=3306
+      - DB_NAME=game_record
+      - DB_USERNAME=root
+      - DB_PASSWORD=123456
+      - JWT_SECRET=gamerecord-jwt-secret-key-please-change-in-prod-2026
+      - JWT_EXPIRE_HOURS=168
+    volumes:
+      - game-record-uploads:/app/uploads
+    ports:
+      - "8080:8080"
+    restart: unless-stopped
+
+  frontend:
+    image: nginx:1.27-alpine
+    container_name: game-record-frontend
+    depends_on:
+      - backend
+    volumes:
+      - ../frontend/dist:/usr/share/nginx/html:ro
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    ports:
+      - "80:80"
+    restart: unless-stopped
+
+  # mysql:
+  #   image: mysql:8.0
+  #   container_name: game-record-mysql
+  #   environment:
+  #     - MYSQL_ROOT_PASSWORD=123456
+  #     - MYSQL_DATABASE=game_record
+  #   volumes:
+  #     - game-record-mysql:/var/lib/mysql
+  #     - ../sql/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+  #   ports:
+  #     - "3306:3306"
+
+volumes:
+  game-record-uploads:
+  # game-record-mysql:

@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>游戏对局记录 · 主页方案A预览</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%230a0e14'/%3E%3Ccircle cx='11' cy='16' r='4' fill='%2338bdf8'/%3E%3Ccircle cx='21' cy='16' r='4' fill='%2360a5fa'/%3E%3Crect x='8' y='12' width='16' height='2' rx='1' fill='%2338bdf8' opacity='.35'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="https://miaoda.feishu.cn/fonts/css2?family=Noto+Sans+SC:wght@300;400;500;700;900&display=swap">
+<style>
+/* ===== 设计 token ===== */
+:root {
+  --bg: #0a0e14;
+  --bg-2: #0e1420;
+  --card: #121826;
+  --card-2: #182036;
+  --line: rgba(148, 163, 184, .14);
+  --text: #e8eef7;
+  --text-2: #94a3b8;
+  --text-3: #64748b;
+  --accent: #38bdf8;
+  --accent-2: #60a5fa;
+  --ok: #34d399;
+  --bad: #f87171;
+  --radius: 16px;
+  --maxw: 1160px;
+  --ease: cubic-bezier(.22, 1, .36, 1);
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: "Noto Sans SC", "Microsoft YaHei", "PingFang SC", sans-serif;
+  font-size: 15px;
+  line-height: 1.7;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+a { color: inherit; text-decoration: none; }
+img { display: block; max-width: 100%; }
+button { font-family: inherit; cursor: pointer; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* 网格底纹（克制） */
+body::before {
+  content: "";
+  position: fixed; inset: 0;
+  background:
+    repeating-linear-gradient(0deg, transparent 0 63px, rgba(148,163,184,.05) 63px 64px),
+    repeating-linear-gradient(90deg, transparent 0 63px, rgba(148,163,184,.05) 63px 64px);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ===== 布局 ===== */
+.wrap { max-width: var(--maxw); margin: 0 auto; padding: 0 24px; position: relative; z-index: 1; }
+section { position: relative; z-index: 1; }
+
+/* ===== 导航 ===== */
+.nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 50;
+  display: flex; align-items: center; justify-content: space-between;
+  height: 68px; padding: 0 28px;
+  transition: background .35s var(--ease), box-shadow .35s var(--ease);
+}
+.nav.scrolled { background: rgba(10, 14, 20, .96); box-shadow: 0 1px 0 var(--line), 0 12px 32px rgba(0,0,0,.35); }
+.nav-logo { display: flex; align-items: center; gap: 12px; font-weight: 700; letter-spacing: .02em; }
+.nav-logo .mark { width: 34px; height: 34px; border-radius: 10px; background: linear-gradient(135deg, var(--accent), var(--accent-2)); display: grid; place-items: center; color: #061018; font-weight: 900; font-size: 15px; }
+.nav-logo small { color: var(--text-3); font-weight: 400; font-size: 12px; margin-top: 2px; }
+.nav-links { display: flex; align-items: center; gap: 6px; }
+.nav-link {
+  border: 0; background: transparent; color: var(--text-2);
+  font-size: 14px; padding: 8px 14px; border-radius: 10px;
+  transition: color .2s, background .2s;
+}
+.nav-link:hover { color: var(--text); background: rgba(148,163,184,.08); }
+.nav-preview {
+  font-size: 11px; letter-spacing: .08em; color: var(--accent);
+  border: 1px solid rgba(56,189,248,.35); padding: 3px 10px; border-radius: 999px; margin-left: 10px;
+}
+
+/* ===== Hero ===== */
+.hero { position: relative; min-height: 100vh; display: flex; align-items: center; overflow: hidden; }
+.hero-glow { position: absolute; border-radius: 50%; filter: blur(90px); opacity: .5; will-change: transform; }
+.hero-glow.g1 { width: 560px; height: 560px; left: -120px; top: -80px; background: radial-gradient(circle, rgba(56,189,248,.55), transparent 65%); animation: drift 14s ease-in-out infinite alternate; }
+.hero-glow.g2 { width: 520px; height: 520px; right: -140px; bottom: -120px; background: radial-gradient(circle, rgba(96,165,250,.42), transparent 65%); animation: drift 18s ease-in-out infinite alternate-reverse; }
+.hero-glow.g3 { width: 360px; height: 360px; right: 26%; top: 12%; background: radial-gradient(circle, rgba(52,211,153,.14), transparent 65%); animation: drift 22s ease-in-out infinite alternate; }
+@keyframes drift {
+  from { transform: translate3d(0, 0, 0) scale(1); }
+  to { transform: translate3d(60px, 40px, 0) scale(1.12); }
+}
+.hero-inner { position: relative; z-index: 2; max-width: var(--maxw); margin: 0 auto; padding: 120px 24px 90px; width: 100%; }
+.hero-eyebrow {
+  font-size: 12px; letter-spacing: .32em; color: var(--accent);
+  display: flex; align-items: center; gap: 12px; margin-bottom: 28px;
+}
+.hero-eyebrow::before { content: ""; width: 36px; height: 1px; background: var(--accent); }
+.hero h1 {
+  font-size: clamp(44px, 8vw, 96px);
+  font-weight: 900; line-height: 1.12; letter-spacing: .01em;
+  text-wrap: balance;
+}
+.hero h1 .line { display: block; overflow: hidden; }
+.hero h1 .line span { display: block; transform: translateY(110%); animation: rise .8s var(--ease) forwards; }
+.hero h1 .line:nth-child(2) span { animation-delay: .12s; }
+.hero h1 .grad { background: linear-gradient(92deg, #e8eef7 30%, var(--accent) 78%); -webkit-background-clip: text; background-clip: text; color: transparent; }
+@keyframes rise { to { transform: translateY(0); } }
+.hero-sub {
+  margin-top: 26px; max-width: 560px; color: var(--text-2);
+  font-size: 16px; font-weight: 300;
+  opacity: 0; animation: fade .9s var(--ease) .5s forwards;
+}
+@keyframes fade { to { opacity: 1; } }
+.hero-cta { display: flex; gap: 14px; margin-top: 40px; flex-wrap: wrap; opacity: 0; animation: fade .9s var(--ease) .66s forwards; }
+.btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 13px 26px; border-radius: 12px; font-size: 15px; font-weight: 500;
+  border: 1px solid transparent; transition: transform .2s var(--ease), box-shadow .2s, background .2s, color .2s;
+}
+.btn-primary { background: linear-gradient(135deg, var(--accent), var(--accent-2)); color: #061018; font-weight: 700; }
+.btn-primary:hover { transform: translateY(-2px); box-shadow: 0 14px 30px rgba(56,189,248,.28); }
+.btn-ghost { border-color: var(--line); color: var(--text); background: rgba(148,163,184,.05); }
+.btn-ghost:hover { border-color: rgba(56,189,248,.5); color: var(--accent); transform: translateY(-2px); }
+.hero-meta { display: flex; gap: 28px; margin-top: 56px; color: var(--text-3); font-size: 13px; opacity: 0; animation: fade .9s var(--ease) .8s forwards; }
+.hero-meta b { color: var(--text); font-weight: 700; font-size: 18px; font-variant-numeric: tabular-nums; }
+.hero-meta span { display: flex; flex-direction: column; }
+.scroll-hint {
+  position: absolute; left: 50%; bottom: 30px; transform: translateX(-50%);
+  width: 26px; height: 42px; border: 1.5px solid rgba(148,163,184,.4); border-radius: 999px;
+  display: flex; justify-content: center; z-index: 2;
+}
+.scroll-hint::after { content: ""; width: 4px; height: 8px; border-radius: 4px; background: var(--accent); margin-top: 8px; animation: dot 1.6s ease-in-out infinite; }
+@keyframes dot { 0%, 100% { transform: translateY(0); opacity: .9; } 50% { transform: translateY(8px); opacity: .3; } }
+
+/* ===== 区块通用 ===== */
+.sec { padding: 110px 0; }
+.sec-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 20px; margin-bottom: 44px; }
+.sec-head .kicker { font-size: 12px; letter-spacing: .3em; color: var(--text-3); margin-bottom: 12px; }
+.sec-head h2 { font-size: clamp(26px, 4vw, 40px); font-weight: 900; letter-spacing: .01em; }
+.sec-head p { color: var(--text-2); font-weight: 300; font-size: 14px; max-width: 380px; }
+.sec-more { color: var(--accent); font-size: 14px; white-space: nowrap; display: inline-flex; align-items: center; gap: 6px; background: none; border: 0; }
+.sec-more:hover svg { transform: translateX(4px); }
+.sec-more svg { transition: transform .25s var(--ease); }
+
+/* 滚动揭示 */
+.reveal { opacity: 0; transform: translateY(26px); transition: opacity .7s var(--ease), transform .7s var(--ease); }
+.reveal.in { opacity: 1; transform: none; }
+
+/* ===== 精选对局 ===== */
+.feature-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
+.f-card {
+  position: relative; border-radius: var(--radius); overflow: hidden;
+  background: var(--card); border: 1px solid var(--line);
+  transform-style: preserve-3d; will-change: transform;
+  transition: border-color .25s, box-shadow .25s;
+}
+.f-card:hover { border-color: rgba(56,189,248,.45); box-shadow: 0 22px 48px rgba(0,0,0,.42); }
+.f-cover { position: relative; aspect-ratio: 16 / 10; overflow: hidden; }
+.f-cover img { width: 100%; height: 100%; object-fit: cover; transition: transform .6s var(--ease); }
+.f-card:hover .f-cover img { transform: scale(1.06); }
+.f-cover::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, transparent 45%, rgba(10,14,20,.88)); }
+.f-badge {
+  position: absolute; top: 14px; left: 14px; z-index: 2;
+  font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 999px;
+  background: rgba(10,14,20,.72); border: 1px solid var(--line); color: var(--text);
+}
+.f-badge.win { color: var(--ok); border-color: rgba(52,211,153,.4); }
+.f-badge.lose { color: var(--bad); border-color: rgba(248,113,113,.4); }
+.f-badge.video { display: inline-flex; align-items: center; gap: 5px; color: var(--text); }
+.f-badge.video::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 8px var(--accent); }
+.f-body { padding: 16px 18px 18px; }
+.f-game { font-size: 12px; color: var(--accent); font-weight: 500; letter-spacing: .04em; }
+.f-title { font-size: 17px; font-weight: 700; margin: 4px 0 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.f-foot { display: flex; align-items: center; justify-content: space-between; color: var(--text-3); font-size: 12.5px; }
+.f-user { display: flex; align-items: center; gap: 8px; }
+.f-avatar { width: 24px; height: 24px; border-radius: 50%; background: linear-gradient(135deg, var(--accent), var(--accent-2)); color: #061018; font-size: 11px; font-weight: 700; display: grid; place-items: center; }
+.f-nums { display: flex; gap: 14px; font-variant-numeric: tabular-nums; }
+.f-nums i { font-style: normal; display: inline-flex; align-items: center; gap: 5px; }
+.f-nums svg { opacity: .75; }
+
+/* ===== 平台数据 ===== */
+#stats { background: var(--bg-2); border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+.stat-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
+.stat {
+  padding: 34px 28px; border-radius: var(--radius);
+  background: var(--card); border: 1px solid var(--line);
+  position: relative; overflow: hidden;
+}
+.stat::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: linear-gradient(180deg, var(--accent), var(--accent-2)); }
+.stat .num { font-size: clamp(30px, 4vw, 44px); font-weight: 900; font-variant-numeric: tabular-nums; letter-spacing: .01em; }
+.stat .num em { font-style: normal; font-size: .6em; font-weight: 700; color: var(--text-3); }
+.stat .lab { margin-top: 6px; color: var(--text-2); font-size: 14px; }
+.stat .cap { margin-top: 16px; height: 4px; border-radius: 4px; background: rgba(148,163,184,.1); overflow: hidden; }
+.stat .cap i { display: block; height: 100%; width: 0; border-radius: 4px; background: linear-gradient(90deg, var(--accent), var(--accent-2)); transition: width 1.4s var(--ease); }
+
+/* ===== 热门游戏榜 ===== */
+.rank-row { display: grid; grid-template-columns: repeat(5, 1fr); gap: 16px; }
+.rank-item {
+  border-radius: var(--radius); border: 1px solid var(--line); background: var(--card);
+  padding: 22px 20px; transition: transform .25s var(--ease), border-color .25s;
+}
+.rank-item:hover { transform: translateY(-6px); border-color: rgba(56,189,248,.4); }
+.rank-no { font-size: 12px; color: var(--text-3); letter-spacing: .2em; }
+.rank-name { font-size: 17px; font-weight: 700; margin: 8px 0 4px; }
+.rank-games { font-size: 12.5px; color: var(--text-2); }
+.rank-bar { margin-top: 14px; height: 6px; border-radius: 6px; background: rgba(148,163,184,.1); overflow: hidden; }
+.rank-bar i { display: block; height: 100%; width: 0; border-radius: 6px; background: linear-gradient(90deg, var(--accent-2), var(--accent)); transition: width 1.2s var(--ease) .15s; }
+.rank-num { margin-top: 8px; font-size: 12px; color: var(--text-3); font-variant-numeric: tabular-nums; }
+
+/* ===== 页脚 ===== */
+.foot { border-top: 1px solid var(--line); padding: 56px 0 40px; color: var(--text-3); font-size: 13px; }
+.foot-grid { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 32px; margin-bottom: 36px; }
+.foot h4 { color: var(--text); font-size: 14px; font-weight: 700; margin-bottom: 14px; }
+.foot a { display: block; padding: 5px 0; color: var(--text-3); }
+.foot a:hover { color: var(--accent); }
+.foot .note { color: var(--text-3); font-weight: 300; max-width: 360px; margin-top: 12px; }
+.foot-bar { border-top: 1px solid var(--line); padding-top: 22px; display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.foot-bar .tag { font-size: 11px; color: var(--accent); border: 1px solid rgba(56,189,248,.3); border-radius: 999px; padding: 2px 10px; }
+
+/* ===== Toast ===== */
+.toast {
+  position: fixed; left: 50%; bottom: 40px; transform: translate(-50%, 80px);
+  background: var(--card-2); border: 1px solid rgba(56,189,248,.35); color: var(--text);
+  padding: 12px 22px; border-radius: 12px; font-size: 14px;
+  box-shadow: 0 18px 44px rgba(0,0,0,.45);
+  opacity: 0; transition: transform .4s var(--ease), opacity .4s; z-index: 99; pointer-events: none;
+}
+.toast.show { transform: translate(-50%, 0); opacity: 1; }
+
+/* ===== 响应式 ===== */
+@media (max-width: 1080px) {
+  .feature-grid { grid-template-columns: repeat(2, 1fr); }
+  .rank-row { grid-template-columns: repeat(3, 1fr); }
+  .stat-grid { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 640px) {
+  .nav { padding: 0 16px; }
+  .nav-links .nav-link { display: none; }
+  .nav-preview { display: none; }
+  .hero-inner { padding-top: 100px; }
+  .hero-meta { gap: 16px; flex-wrap: wrap; }
+  .sec { padding: 72px 0; }
+  .sec-head { flex-direction: column; align-items: flex-start; }
+  .feature-grid { grid-template-columns: 1fr; }
+  .rank-row { grid-template-columns: 1fr 1fr; }
+  .stat-grid { grid-template-columns: 1fr 1fr; }
+  .foot-grid { grid-template-columns: 1fr; }
+}
+
+/* ===== 减少动效 ===== */
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+  .hero h1 .line span, .hero-sub, .hero-cta, .hero-meta { transform: none; opacity: 1; }
+  .reveal { opacity: 1; transform: none; }
+}
+</style>
+</head>
+<!-- hero placeholder -->
+<body>
+
+<!-- ===== 导航 ===== -->
+<nav class="nav" id="nav">
+  <a class="nav-logo" href="#top" data-nav="logo">
+    <span class="mark">GR</span>
+    <span>游戏对局记录<small style="display:block">GAME RECORD CENTER</small></span>
+  </a>
+  <div class="nav-links">
+    <button class="nav-link" data-toast>全部对局</button>
+    <button class="nav-link" data-toast>上传对局</button>
+    <button class="nav-link" data-toast>个人中心</button>
+    <span class="nav-preview">方案A预览</span>
+  </div>
+</nav>
+
+<!-- ===== Hero ===== -->
+<header class="hero" id="top">
+  <div class="hero-glow g1"></div>
+  <div class="hero-glow g2"></div>
+  <div class="hero-glow g3"></div>
+  <div class="hero-inner">
+    <div class="hero-eyebrow">GAME RECORD CENTER</div>
+    <h1>
+      <span class="line"><span>记录每一场</span></span>
+      <span class="line"><span class="grad">精彩对局</span></span>
+    </h1>
+    <p class="hero-sub">上传视频、分享战绩、围观高光时刻。这里是属于每一位玩家的对局档案馆——把胜利与名场面，留给后来的人看。</p>
+    <div class="hero-cta">
+      <button class="btn btn-primary" data-toast>去逛逛对局库
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+      </button>
+      <button class="btn btn-ghost" data-toast>上传对局</button>
+    </div>
+    <div class="hero-meta">
+      <span><b>4 大</b>核心能力</span>
+      <span><b>7 类</b>覆盖游戏</span>
+      <span><b>24h</b>持续更新</span>
+    </div>
+  </div>
+  <div class="scroll-hint" aria-hidden="true"></div>
+</header>
+
+<!-- ===== 精选对局 ===== -->
+<section class="sec" id="featured">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <div>
+        <div class="kicker">FEATURED</div>
+        <h2>精选对局</h2>
+      </div>
+      <button class="sec-more" data-toast>查看全部
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+      </button>
+    </div>
+    <div class="feature-grid" id="featureGrid">
+      <article class="f-card reveal">
+        <div class="f-cover">
+          <span class="f-badge video">视频对局</span>
+          <img src="assets/coverA.jpg" alt="三角洲行动 烽火地带">
+        </div>
+        <div class="f-body">
+          <div class="f-game">三角洲行动 · 烽火地带</div>
+          <div class="f-title">废墟防线，最后三分钟翻盘</div>
+          <div class="f-foot">
+            <span class="f-user"><span class="f-avatar">P</span>player1</span>
+            <span class="f-nums"><i><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l2.7 5.5 6.1.9-4.4 4.3 1 6-5.4-2.9-5.4 2.9 1-6L2.6 9.4l6.1-.9z"/></svg>2.4k</i><i><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.4 8.4 0 0 1-8.5 8.3c-1.2 0-2.4-.3-3.4-.8L3 20l1.1-5.7A8 8 0 1 1 21 11.5z"/></svg>386</i></span>
+          </div>
+        </div>
+      </article>
+      <article class="f-card reveal">
+        <div class="f-cover">
+          <span class="f-badge win">胜利</span>
+          <img src="assets/cover2.jpg" alt="无畏契约 爆能决胜">
+        </div>
+        <div class="f-body">
+          <div class="f-game">无畏契约 · 爆能决胜</div>
+          <div class="f-title">残局一打三，拆包绝杀</div>
+          <div class="f-foot">
+            <span class="f-user"><span class="f-avatar">T</span>tester01</span>
+            <span class="f-nums"><i><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l2.7 5.5 6.1.9-4.4 4.3 1 6-5.4-2.9-5.4 2.9 1-6L2.6 9.4l6.1-.9z"/></svg>1.9k</i><i><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.4 8.4 0 0 1-8.5 8.3c-1.2 0-2.4-.3-3.4-.8L3 20l1.1-5.7A8 8 0 1 1 21 11.5z"/></svg>214</i></span>
+          </div>
+        </div>
+      </article>
+      <article class="f-card reveal">
+        <div class="f-cover">
+          <span class="f-badge win">胜利</span>
+          <img src="assets/coverC.jpg" alt="英雄联盟 峡谷巅峰">
+        </div>
+        <div class="f-body">
+          <div class="f-game">英雄联盟 · 峡谷巅峰</div>
+          <div class="f-title">寒夜挽歌，五杀收官</div>
+          <div class="f-foot">
+            <span class="f-user"><span class="f-avatar">P</span>player1</span>
+            <span class="f-nums"><i><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l2.7 5.5 6.1.9-4.4 4.3 1 6-5.4-2.9-5.4 2.9 1-6L2.6 9.4l6.1-.9z"/></svg>3.1k</i><i><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.4 8.4 0 0 1-8.5 8.3c-1.2 0-2.4-.3-3.4-.8L3 20l1.1-5.7A8 8 0 1 1 21 11.5z"/></svg>520</i></span>
+          </div>
+        </div>
+      </article>
+      <article class="f-card reveal">
+        <div class="f-cover">
+          <span class="f-badge lose">败北</span>
+          <img src="assets/coverD.jpg" alt="三角洲行动 红隼桥">
+        </div>
+        <div class="f-body">
+          <div class="f-game">三角洲行动 · 红隼桥</div>
+          <div class="f-title">高光集锦：桥头对狙</div>
+          <div class="f-foot">
+            <span class="f-user"><span class="f-avatar">A</span>admin2</span>
+            <span class="f-nums"><i><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l2.7 5.5 6.1.9-4.4 4.3 1 6-5.4-2.9-5.4 2.9 1-6L2.6 9.4l6.1-.9z"/></svg>862</i><i><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.4 8.4 0 0 1-8.5 8.3c-1.2 0-2.4-.3-3.4-.8L3 20l1.1-5.7A8 8 0 1 1 21 11.5z"/></svg>97</i></span>
+          </div>
+        </div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 平台数据 ===== -->
+<section class="sec" id="stats">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <div>
+        <div class="kicker">PLATFORM</div>
+        <h2>平台数据</h2>
+      </div>
+      <p>把每一次点击、点赞与评论，汇成社区成长的数字。</p>
+    </div>
+    <div class="stat-grid">
+      <div class="stat reveal"><div class="num"><span data-count="12846">0</span><em> 局</em></div><div class="lab">已上传对局</div><div class="cap"><i data-width="82"></i></div></div>
+      <div class="stat reveal"><div class="num"><span data-count="36520">0</span><em> 次</em></div><div class="lab">累计点赞</div><div class="cap"><i data-width="64"></i></div></div>
+      <div class="stat reveal"><div class="num"><span data-count="8214">0</span><em> 条</em></div><div class="lab">累计评论</div><div class="cap"><i data-width="48"></i></div></div>
+      <div class="stat reveal"><div class="num"><span data-count="3109">0</span><em> 位</em></div><div class="lab">注册玩家</div><div class="cap"><i data-width="36"></i></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 热门游戏榜 ===== -->
+<section class="sec" id="rank">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <div>
+        <div class="kicker">TOP GAMES</div>
+        <h2>热门游戏榜</h2>
+      </div>
+      <button class="sec-more" data-toast>查看榜单
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+      </button>
+    </div>
+    <div class="rank-row" id="rankRow">
+      <div class="rank-item reveal"><div class="rank-no">NO.01</div><div class="rank-name">三角洲行动</div><div class="rank-games">4,382 局对局</div><div class="rank-bar"><i data-width="96"></i></div><div class="rank-num">热度 96</div></div>
+      <div class="rank-item reveal"><div class="rank-no">NO.02</div><div class="rank-name">英雄联盟</div><div class="rank-games">3,215 局对局</div><div class="rank-bar"><i data-width="78"></i></div><div class="rank-num">热度 78</div></div>
+      <div class="rank-item reveal"><div class="rank-no">NO.03</div><div class="rank-name">王者荣耀</div><div class="rank-games">2,690 局对局</div><div class="rank-bar"><i data-width="62"></i></div><div class="rank-num">热度 62</div></div>
+      <div class="rank-item reveal"><div class="rank-no">NO.04</div><div class="rank-name">无畏契约</div><div class="rank-games">1,847 局对局</div><div class="rank-bar"><i data-width="48"></i></div><div class="rank-num">热度 48</div></div>
+      <div class="rank-item reveal"><div class="rank-no">NO.05</div><div class="rank-name">和平精英</div><div class="rank-games">1,206 局对局</div><div class="rank-bar"><i data-width="34"></i></div><div class="rank-num">热度 34</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 页脚 ===== -->
+<footer class="foot">
+  <div class="wrap">
+    <div class="foot-grid">
+      <div>
+        <div class="nav-logo"><span class="mark">GR</span><span>游戏对局记录</span></div>
+        <p class="note">玩家社区对局档案馆：上传、评论、点赞，留住每一场精彩。</p>
+      </div>
+      <div>
+        <h4>快速入口</h4>
+        <a href="#featured" data-toast>精选对局</a>
+        <a href="#stats" data-toast>平台数据</a>
+        <a href="#rank" data-toast>热门游戏</a>
+      </div>
+      <div>
+        <h4>关于</h4>
+        <a href="#" data-toast>使用说明</a>
+        <a href="#" data-toast>反馈建议</a>
+        <a href="#" data-toast>管理员入口</a>
+      </div>
+    </div>
+    <div class="foot-bar">
+      <span>© 2026 游戏对局记录 · 毕业设计项目</span>
+      <span class="tag">方案A · 影视飓风质感 · 预览版</span>
+    </div>
+  </div>
+</footer>
+
+<div class="toast" id="toast">演示预览：该入口将在正式版中生效</div>
+
+<script>
+(function () {
+  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* 导航滚动加深 */
+  var nav = document.getElementById('nav');
+  function onScroll() {
+    nav.classList.toggle('scrolled', window.scrollY > 40);
+  }
+  window.addEventListener('scroll', onScroll, { passive: true });
+  onScroll();
+
+  /* 滚动揭示 */
+  var revealEls = document.querySelectorAll('.reveal');
+  if (reduce || !('IntersectionObserver' in window)) {
+    revealEls.forEach(function (el) { el.classList.add('in'); });
+  } else {
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); }
+      });
+    }, { threshold: 0.12 });
+    revealEls.forEach(function (el) { io.observe(el); });
+  }
+
+  /* 数字递增 + 进度条 */
+  function animateCount(el, target, dur) {
+    var t0 = performance.now();
+    function step(t) {
+      var p = Math.min(1, (t - t0) / dur);
+      var ease = 1 - Math.pow(1 - p, 3);
+      el.textContent = Math.round(target * ease).toLocaleString('en-US');
+      if (p < 1) requestAnimationFrame(step);
+    }
+    requestAnimationFrame(step);
+  }
+  function triggerCounts() {
+    document.querySelectorAll('.stat .num span[data-count]').forEach(function (el) {
+      var n = parseInt(el.getAttribute('data-count'), 10);
+      if (el.dataset.done) return;
+      el.dataset.done = '1';
+      animateCount(el, n, 1400);
+    });
+    document.querySelectorAll('[data-width]').forEach(function (el) {
+      var w = el.getAttribute('data-width');
+      if (!el.dataset.done) { el.dataset.done = '1'; el.style.width = w + '%'; }
+    });
+  }
+  var statsSec = document.getElementById('stats');
+  if (reduce) {
+    document.querySelectorAll('.stat .num span[data-count]').forEach(function (el) {
+      el.textContent = parseInt(el.getAttribute('data-count'), 10).toLocaleString('en-US');
+    });
+    document.querySelectorAll('[data-width]').forEach(function (el) { el.style.width = el.getAttribute('data-width') + '%'; });
+  } else if ('IntersectionObserver' in window) {
+    var io2 = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) { if (e.isIntersecting) { triggerCounts(); io2.disconnect(); } });
+    }, { threshold: 0.3 });
+    io2.observe(statsSec);
+  } else {
+    triggerCounts();
+  }
+
+  /* 精选卡片 3D 倾斜（仅精确指针设备） */
+  function isFine() { return window.matchMedia('(pointer: fine)').matches; }
+  if (isFine() && !reduce) {
+    var cards = document.querySelectorAll('.f-card');
+    cards.forEach(function (card) {
+      card.addEventListener('mousemove', function (e) {
+        var r = card.getBoundingClientRect();
+        var x = (e.clientX - r.left) / r.width - 0.5;
+        var y = (e.clientY - r.top) / r.height - 0.5;
+        card.style.transform = 'perspective(900px) rotateX(' + (-y * 7) + 'deg) rotateY(' + (x * 9) + 'deg) translateY(-4px)';
+      });
+      card.addEventListener('mouseleave', function () {
+        card.style.transform = '';
+      });
+    });
+  }
+
+  /* 占位反馈：所有 data-toast 入口 */
+  var toast = document.getElementById('toast');
+  var toastTimer = null;
+  function showToast(msg) {
+    toast.textContent = msg || '演示预览：该入口将在正式版中生效';
+    toast.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { toast.classList.remove('show'); }, 2200);
+  }
+  document.querySelectorAll('[data-toast]').forEach(function (el) {
+    el.addEventListener('click', function (e) {
+      e.preventDefault();
+      showToast();
+    });
+  });
+})();
+</script>
+</body>
+</html>

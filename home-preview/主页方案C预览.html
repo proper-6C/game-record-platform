@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>游戏对局记录 · 主页方案C预览</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23f5f3ee'/%3E%3Crect x='7' y='7' width='18' height='18' fill='none' stroke='%23141414' stroke-width='3'/%3E%3Ccircle cx='16' cy='16' r='4' fill='%23d9493f'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="https://miaoda.feishu.cn/fonts/css2?family=Noto+Serif+SC:wght@500;700;900&family=Noto+Sans+SC:wght@300;400;500;700&display=swap">
+<style>
+:root {
+  --paper: #f5f3ee;
+  --ink: #141414;
+  --ink-2: #4b4b46;
+  --ink-3: #8a8a82;
+  --red: #d9493f;
+  --line: #cfccc2;
+  --maxw: 1160px;
+  --ease: cubic-bezier(.22, 1, .36, 1);
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  background: var(--paper); color: var(--ink);
+  font-family: "Noto Sans SC", "PingFang SC", "Microsoft YaHei", sans-serif;
+  font-size: 15px; line-height: 1.75; -webkit-font-smoothing: antialiased; overflow-x: hidden;
+}
+a { color: inherit; text-decoration: none; }
+img { display: block; max-width: 100%; }
+button { font-family: inherit; cursor: pointer; }
+:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+
+.wrap { max-width: var(--maxw); margin: 0 auto; padding: 0 28px; }
+section { position: relative; }
+
+/* 导航（印刷感细线） */
+.nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 50;
+  height: 60px; display: flex; align-items: center; justify-content: space-between;
+  background: var(--paper); border-bottom: 1px solid var(--ink);
+  padding: 0 28px;
+}
+.nav-logo { font-family: "Noto Serif SC", serif; font-weight: 900; font-size: 19px; letter-spacing: .04em; display: flex; align-items: baseline; gap: 10px; }
+.nav-logo .ed { font-size: 11px; font-weight: 500; color: var(--red); border: 1px solid var(--red); padding: 1px 8px; letter-spacing: .12em; font-family: "Noto Sans SC", sans-serif; }
+.nav-links { display: flex; gap: 0; }
+.nav-link { border: 0; background: none; font-size: 14px; color: var(--ink-2); padding: 10px 16px; border-bottom: 2px solid transparent; transition: color .2s, border-color .2s; }
+.nav-link:hover { color: var(--ink); border-bottom-color: var(--ink); }
+
+/* Hero：超大编辑排版 */
+.hero { padding: 130px 0 70px; border-bottom: 1px solid var(--ink); position: relative; }
+.hero-mast {
+  display: flex; justify-content: space-between; align-items: baseline;
+  border-top: 3px solid var(--ink); border-bottom: 1px solid var(--line);
+  padding: 10px 0; margin-bottom: 56px; font-size: 12px; color: var(--ink-2); letter-spacing: .06em;
+}
+.hero h1 {
+  font-family: "Noto Serif SC", serif; font-weight: 900;
+  font-size: clamp(42px, 7.6vw, 88px); line-height: 1.14; letter-spacing: .01em;
+  text-wrap: balance; max-width: 880px;
+}
+.hero h1 .line { display: block; overflow: hidden; }
+.hero h1 .line span { display: block; transform: translateY(110%); animation: rise .75s var(--ease) forwards; }
+.hero h1 .line:nth-child(2) span { animation-delay: .1s; }
+.hero h1 em { font-style: normal; color: var(--red); }
+@keyframes rise { to { transform: translateY(0); } }
+.hero-row { display: grid; grid-template-columns: 1.6fr 1fr; gap: 56px; margin-top: 36px; }
+.hero-lead { font-size: 17px; font-weight: 300; color: var(--ink-2); max-width: 560px; opacity: 0; animation: fade .8s var(--ease) .35s forwards; }
+.hero-cta { display: flex; gap: 14px; margin-top: 30px; opacity: 0; animation: fade .8s var(--ease) .45s forwards; }
+@keyframes fade { to { opacity: 1; } }
+.btn { padding: 12px 26px; font-size: 14px; font-weight: 700; border: 1.5px solid var(--ink); background: none; color: var(--ink); transition: background .2s, color .2s, transform .2s var(--ease); }
+.btn:hover { background: var(--ink); color: var(--paper); transform: translateY(-2px); }
+.btn-solid { background: var(--ink); color: var(--paper); }
+.btn-solid:hover { background: var(--red); border-color: var(--red); }
+.hero-side { border-left: 1px solid var(--line); padding-left: 32px; align-self: start; opacity: 0; animation: fade .8s var(--ease) .55s forwards; }
+.hero-side h4 { font-size: 12px; letter-spacing: .18em; color: var(--red); margin-bottom: 16px; }
+.hero-side .fact { display: flex; justify-content: space-between; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--line); font-size: 13.5px; color: var(--ink-2); }
+.hero-side .fact b { font-family: "Noto Serif SC", serif; font-weight: 900; font-size: 17px; color: var(--ink); font-variant-numeric: tabular-nums; }
+.hero-side .fact b em { font-style: normal; font-size: 11px; color: var(--ink-3); font-weight: 400; margin-left: 2px; }
+
+/* 区块 */
+.sec { padding: 92px 0; }
+.sec-head { display: flex; align-items: center; gap: 18px; margin-bottom: 40px; }
+.sec-head .no { font-family: "Noto Serif SC", serif; font-size: 15px; font-weight: 900; color: var(--red); border: 1px solid var(--ink); padding: 3px 10px; }
+.sec-head h2 { font-family: "Noto Serif SC", serif; font-weight: 900; font-size: 30px; letter-spacing: .02em; }
+.sec-head .rule { flex: 1; height: 1px; background: var(--line); }
+.reveal { opacity: 0; transform: translateY(22px); transition: opacity .65s var(--ease), transform .65s var(--ease); }
+.reveal.in { opacity: 1; transform: none; }
+
+/* 头条 */
+.feat-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 28px; }
+.feat-main { border: 1px solid var(--ink); background: #fff; }
+.feat-main .img { position: relative; overflow: hidden; aspect-ratio: 16 / 9; }
+.feat-main .img img { width: 100%; height: 100%; object-fit: cover; transition: transform .6s var(--ease); }
+.feat-main:hover .img img { transform: scale(1.05); }
+.feat-main .cat { position: absolute; left: 0; top: 0; background: var(--red); color: #fff; font-size: 12px; font-weight: 700; padding: 6px 14px; letter-spacing: .1em; }
+.feat-main .body { padding: 26px 28px 30px; }
+.feat-main h3 { font-family: "Noto Serif SC", serif; font-weight: 900; font-size: 27px; line-height: 1.35; margin-bottom: 12px; }
+.feat-main .meta { display: flex; gap: 18px; font-size: 12.5px; color: var(--ink-3); }
+.feat-main .meta b { color: var(--ink); font-weight: 700; }
+.feat-side { display: grid; gap: 22px; }
+.feat-side .item { display: grid; grid-template-columns: 130px 1fr; gap: 18px; align-items: center; }
+.feat-side .thumb { aspect-ratio: 16 / 10; overflow: hidden; background: #eee; }
+.feat-side .thumb img { width: 100%; height: 100%; object-fit: cover; transition: transform .5s var(--ease); }
+.feat-side .item:hover .thumb img { transform: scale(1.06); }
+.feat-side .txt h4 { font-family: "Noto Serif SC", serif; font-weight: 700; font-size: 16.5px; line-height: 1.45; margin-bottom: 8px; }
+.feat-side .txt span { font-size: 12px; color: var(--ink-3); }
+.feat-side .txt span b { color: var(--red); font-weight: 700; margin-right: 8px; }
+
+/* 瀑布流 */
+.waterfall { columns: 3; column-gap: 24px; }
+.w-card { break-inside: avoid; margin-bottom: 24px; background: #fff; border: 1px solid var(--line); }
+.w-card .img { position: relative; overflow: hidden; }
+.w-card .img img { width: 100%; transition: transform .55s var(--ease); }
+.w-card:hover .img img { transform: scale(1.05); }
+.w-card .cat { position: absolute; left: 0; top: 0; background: var(--ink); color: var(--paper); font-size: 11px; font-weight: 700; padding: 4px 10px; letter-spacing: .08em; }
+.w-card.win .cat { background: var(--red); }
+.w-card .body { padding: 18px 20px 20px; }
+.w-card h4 { font-family: "Noto Serif SC", serif; font-weight: 700; font-size: 17px; line-height: 1.5; margin-bottom: 10px; }
+.w-card p { font-size: 13px; color: var(--ink-2); font-weight: 300; line-height: 1.8; margin-bottom: 12px; }
+.w-card .meta { display: flex; justify-content: space-between; font-size: 12px; color: var(--ink-3); border-top: 1px solid var(--line); padding-top: 10px; }
+.w-card .meta b { color: var(--ink); font-weight: 700; }
+.w-quote { background: none; border: 0; border-top: 3px solid var(--ink); border-bottom: 1px solid var(--ink); padding: 26px 4px 22px; }
+.w-quote blockquote { font-family: "Noto Serif SC", serif; font-weight: 700; font-size: 21px; line-height: 1.55; margin-bottom: 14px; }
+.w-quote .src { font-size: 12px; color: var(--red); letter-spacing: .12em; }
+.w-num { background: none; border: 0; padding: 8px 4px 4px; }
+.w-num .big { font-family: "Noto Serif SC", serif; font-weight: 900; font-size: 54px; line-height: 1; color: var(--ink); }
+.w-num .big em { font-style: normal; color: var(--red); }
+.w-num p { margin-top: 10px; font-size: 13px; color: var(--ink-2); font-weight: 300; }
+
+/* 排行 */
+.rank-ol { border-top: 2px solid var(--ink); }
+.rank-li { display: grid; grid-template-columns: 64px 1fr 120px; align-items: center; gap: 20px; padding: 16px 6px; border-bottom: 1px solid var(--line); transition: background .2s, padding-left .25s var(--ease); }
+.rank-li:hover { background: rgba(0,0,0,.03); padding-left: 16px; }
+.rank-no { font-family: "Noto Serif SC", serif; font-weight: 900; font-size: 26px; color: var(--ink-3); font-variant-numeric: tabular-nums; }
+.rank-li:first-child .rank-no { color: var(--red); }
+.rank-li b { font-size: 16px; font-weight: 700; }
+.rank-li small { display: block; color: var(--ink-3); font-size: 12.5px; font-weight: 400; }
+.rank-count { font-size: 13.5px; color: var(--ink-2); text-align: right; font-variant-numeric: tabular-nums; }
+.rank-count b { color: var(--ink); font-weight: 900; }
+
+/* 页脚 */
+.foot { border-top: 1px solid var(--ink); padding: 48px 0 36px; }
+.foot-grid { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 32px; }
+.foot h4 { font-family: "Noto Serif SC", serif; font-weight: 700; font-size: 15px; margin-bottom: 12px; }
+.foot a { display: block; padding: 4px 0; font-size: 13.5px; color: var(--ink-2); }
+.foot a:hover { color: var(--red); }
+.foot-bar { border-top: 1px solid var(--line); margin-top: 36px; padding-top: 20px; display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; font-size: 12.5px; color: var(--ink-3); }
+.foot-bar .tag { color: var(--red); border: 1px solid var(--red); padding: 1px 10px; letter-spacing: .1em; font-size: 11px; }
+
+/* Toast */
+.toast {
+  position: fixed; left: 50%; bottom: 40px; transform: translate(-50%, 80px);
+  background: var(--ink); color: var(--paper); padding: 12px 22px; font-size: 14px;
+  border-radius: 2px; opacity: 0; transition: transform .4s var(--ease), opacity .4s;
+  z-index: 99; pointer-events: none;
+}
+.toast.show { transform: translate(-50%, 0); opacity: 1; }
+
+/* 响应式 */
+@media (max-width: 1000px) {
+  .feat-grid { grid-template-columns: 1fr; }
+  .feat-side { grid-template-columns: 1fr 1fr; }
+  .waterfall { columns: 2; }
+  .hero-row { grid-template-columns: 1fr; }
+  .hero-side { border-left: 0; padding-left: 0; border-top: 1px solid var(--line); padding-top: 20px; }
+}
+@media (max-width: 640px) {
+  .nav { padding: 0 14px; }
+  .nav-links .nav-link { display: none; }
+  .hero { padding-top: 100px; }
+  .feat-side { grid-template-columns: 1fr; }
+  .feat-side .item { grid-template-columns: 110px 1fr; }
+  .waterfall { columns: 1; }
+  .rank-li { grid-template-columns: 48px 1fr; }
+  .rank-count { grid-column: 2; text-align: left; }
+  .foot-grid { grid-template-columns: 1fr; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+  .hero h1 .line span, .hero-lead, .hero-cta, .hero-side { transform: none; opacity: 1; }
+  .reveal { opacity: 1; transform: none; }
+}
+</style>
+</head>
+<body>
+
+<!-- ===== 导航 ===== -->
+<nav class="nav">
+  <div class="nav-logo">对局志<span class="ed">ISSUE 2026</span></div>
+  <div class="nav-links">
+    <button class="nav-link" data-toast>全部对局</button>
+    <button class="nav-link" data-toast>上传对局</button>
+    <button class="nav-link" data-toast>个人中心</button>
+  </div>
+</nav>
+
+<!-- ===== Hero ===== -->
+<header class="hero">
+  <div class="wrap">
+    <div class="hero-mast">
+      <span>GAME RECORD JOURNAL</span>
+      <span>VOL.01 · 玩家社区特刊</span>
+    </div>
+    <h1>
+      <span class="line"><span>每一场对局，</span></span>
+      <span class="line"><span>都值得被<em>记录</em></span></span>
+    </h1>
+    <div class="hero-row">
+      <div>
+        <p class="hero-lead">这是一本属于玩家的对局杂志——上传你的视频、留下你的评论、点亮你的点赞，把每一个精彩瞬间装订成册。</p>
+        <div class="hero-cta">
+          <button class="btn btn-solid" data-toast>进入对局库</button>
+          <button class="btn" data-toast>上传对局</button>
+        </div>
+      </div>
+      <div class="hero-side">
+        <h4>本刊数据</h4>
+        <div class="fact"><span>已收录对局</span><b>12,846<em>局</em></b></div>
+        <div class="fact"><span>累计获赞</span><b>36,520<em>次</em></b></div>
+        <div class="fact"><span>玩家来信</span><b>8,214<em>条</em></b></div>
+        <div class="fact"><span>注册读者</span><b>3,109<em>位</em></b></div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- ===== 本期头条 ===== -->
+<section class="sec" id="featured">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <span class="no">01</span>
+      <h2>本期头条</h2>
+      <span class="rule"></span>
+    </div>
+    <div class="feat-grid">
+      <article class="feat-main reveal">
+        <div class="img">
+          <span class="cat">封面故事</span>
+          <img src="assets/coverC.jpg" alt="寒夜挽歌，五杀收官">
+        </div>
+        <div class="body">
+          <h3>寒夜挽歌：峡谷之巅的那一次五杀收官</h3>
+          <p style="color:var(--ink-2);font-weight:300;font-size:14.5px;margin-bottom:14px;">凌晨一点的排位赛，敌方水晶只剩最后一座。弓箭手贴墙绕后，一套连招带走三人，留下全场喝彩——这一局被收录为本期封面。</p>
+          <div class="meta"><span>作者 <b>player1</b></span><span>点赞 <b>3,120</b></span><span>评论 <b>520</b></span></div>
+        </div>
+      </article>
+      <div class="feat-side">
+        <div class="item reveal">
+          <div class="thumb"><img src="assets/coverA.jpg" alt="废墟防线"></div>
+          <div class="txt"><h4>废墟防线，最后三分钟翻盘</h4><span><b>三角洲行动</b>player1 · 2,400 赞</span></div>
+        </div>
+        <div class="item reveal">
+          <div class="thumb"><img src="assets/cover2.jpg" alt="残局一打三"></div>
+          <div class="txt"><h4>残局一打三，拆包绝杀</h4><span><b>无畏契约</b>tester01 · 1,900 赞</span></div>
+        </div>
+        <div class="item reveal">
+          <div class="thumb"><img src="assets/coverD.jpg" alt="桥头对狙"></div>
+          <div class="txt"><h4>桥头对狙：一枪定胜负</h4><span><b>三角洲行动</b>admin2 · 862 赞</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 对局瀑布流 ===== -->
+<section class="sec" id="stream" style="padding-top:0">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <span class="no">02</span>
+      <h2>对局瀑布</h2>
+      <span class="rule"></span>
+    </div>
+    <div class="waterfall">
+      <article class="w-card win reveal">
+        <div class="img"><span class="cat">胜利</span><img src="assets/cover2.jpg" alt="无畏契约 爆能决胜"></div>
+        <div class="body">
+          <h4>残局一打三，拆包绝杀</h4>
+          <p>剩 12 秒，队友全倒。烟幕里架枪，击倒、换弹、再击倒——拆包铃响的一刻，全场只剩欢呼。</p>
+          <div class="meta"><span><b>tester01</b></span><span>1.9k 赞 · 214 评</span></div>
+        </div>
+      </article>
+      <div class="w-quote reveal">
+        <blockquote>「把胜利与名场面，留给后来的人看。」</blockquote>
+        <span class="src">— 编辑部 · 发刊词</span>
+      </div>
+      <article class="w-card reveal">
+        <div class="img"><span class="cat">高光集锦</span><img src="assets/coverD.jpg" alt="三角洲行动 红隼桥"></div>
+        <div class="body">
+          <h4>桥头对狙：一枪定胜负</h4>
+          <p>红隼桥的中轴，两支队伍隔着桥墩对峙。开镜、屏息、击发——子弹穿过硝烟，命中桥头。</p>
+          <div class="meta"><span><b>admin2</b></span><span>862 赞 · 97 评</span></div>
+        </div>
+      </article>
+      <div class="w-num reveal">
+        <div class="big">12,846<em> 局</em></div>
+        <p>已收录对局，且仍在以每天三位数的速度增长。每一条都是玩家亲手上传的真实战绩。</p>
+      </div>
+      <article class="w-card win reveal">
+        <div class="img"><span class="cat">胜利</span><img src="assets/coverA.jpg" alt="三角洲行动 烽火地带"></div>
+        <div class="body">
+          <h4>废墟防线，最后三分钟翻盘</h4>
+          <p>物资耗尽、队伍减员，但废墟的每一面墙都是掩体。三分钟里完成三次反扑，守住最后的防线。</p>
+          <div class="meta"><span><b>player1</b></span><span>2.4k 赞 · 386 评</span></div>
+        </div>
+      </article>
+      <div class="w-quote reveal">
+        <blockquote>「高光不是天赋，是被记录下来的每一刻。」</blockquote>
+        <span class="src">— 玩家来信 · 第 47 期</span>
+      </div>
+      <article class="w-card win reveal">
+        <div class="img"><span class="cat">胜利</span><img src="assets/coverC.jpg" alt="英雄联盟 峡谷巅峰"></div>
+        <div class="body">
+          <h4>寒夜挽歌，五杀收官</h4>
+          <p>凌晨的排位赛，水晶前一波完美团战。五杀播报亮起的瞬间，峡谷安静了三秒。</p>
+          <div class="meta"><span><b>player1</b></span><span>3.1k 赞 · 520 评</span></div>
+        </div>
+      </article>
+      <div class="w-num reveal">
+        <div class="big">36,520<em> 次</em></div>
+        <p>玩家们累计按下的点赞。每一个赞，都是对一场好对局的敬意。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 热门游戏排行 ===== -->
+<section class="sec" id="rank" style="padding-top:0">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <span class="no">03</span>
+      <h2>热门游戏排行</h2>
+      <span class="rule"></span>
+    </div>
+    <div class="rank-ol">
+      <div class="rank-li reveal"><span class="rank-no">01</span><span><b>三角洲行动</b><small>战术射击 · 本周新增 1,024 局</small></span><span class="rank-count"><b>4,382</b> 局对局</span></div>
+      <div class="rank-li reveal"><span class="rank-no">02</span><span><b>英雄联盟</b><small>MOBA · 本周新增 780 局</small></span><span class="rank-count"><b>3,215</b> 局对局</span></div>
+      <div class="rank-li reveal"><span class="rank-no">03</span><span><b>王者荣耀</b><small>MOBA · 本周新增 652 局</small></span><span class="rank-count"><b>2,690</b> 局对局</span></div>
+      <div class="rank-li reveal"><span class="rank-no">04</span><span><b>无畏契约</b><small>FPS · 本周新增 415 局</small></span><span class="rank-count"><b>1,847</b> 局对局</span></div>
+      <div class="rank-li reveal"><span class="rank-no">05</span><span><b>和平精英</b><small>战术竞技 · 本周新增 288 局</small></span><span class="rank-count"><b>1,206</b> 局对局</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 页脚 ===== -->
+<footer class="foot">
+  <div class="wrap">
+    <div class="foot-grid">
+      <div>
+        <div class="nav-logo" style="font-size:17px">对局志<span class="ed">ISSUE 2026</span></div>
+        <p style="font-size:13.5px;color:var(--ink-2);margin-top:10px;max-width:340px;font-weight:300;">一本属于玩家的对局杂志：上传、评论、点赞，留住每一场精彩。</p>
+      </div>
+      <div>
+        <h4>栏目</h4>
+        <a href="#featured" data-toast>本期头条</a>
+        <a href="#stream" data-toast>对局瀑布</a>
+        <a href="#rank" data-toast>游戏排行</a>
+      </div>
+      <div>
+        <h4>关于</h4>
+        <a href="#" data-toast>投稿指南</a>
+        <a href="#" data-toast>意见反馈</a>
+        <a href="#" data-toast>编辑部</a>
+      </div>
+    </div>
+    <div class="foot-bar">
+      <span>© 2026 游戏对局记录 · 毕业设计项目</span>
+      <span class="tag">方案C · 杂志瀑布流 · 预览版</span>
+    </div>
+  </div>
+</footer>
+
+<div class="toast" id="toast">演示预览：该入口将在正式版中生效</div>
+
+<script>
+(function () {
+  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var revealEls = document.querySelectorAll('.reveal');
+  if (reduce || !('IntersectionObserver' in window)) {
+    revealEls.forEach(function (el) { el.classList.add('in'); });
+  } else {
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } });
+    }, { threshold: 0.1 });
+    revealEls.forEach(function (el) { io.observe(el); });
+  }
+  var toast = document.getElementById('toast');
+  var toastTimer = null;
+  function showToast() {
+    toast.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { toast.classList.remove('show'); }, 2200);
+  }
+  document.querySelectorAll('[data-toast]').forEach(function (el) {
+    el.addEventListener('click', function (e) { e.preventDefault(); showToast(); });
+  });
+})();
+</script>
+</body>
+</html>

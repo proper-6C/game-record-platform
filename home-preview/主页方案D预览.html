@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>游戏对局记录 · 主页方案D预览</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%230a0f1e'/%3E%3Crect x='7' y='19' width='18' height='5' fill='%234cc3ff'/%3E%3Crect x='7' y='10' width='10' height='4' fill='%2392a6c4'/%3E%3Ccircle cx='24' cy='12' r='3' fill='%2338bdf8'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="https://miaoda.feishu.cn/fonts/css2?family=Noto+Sans+SC:wght@300;400;500;700;900&family=JetBrains+Mono:wght@500;700&display=swap">
+<style>
+:root {
+  --bg: #0a0f1e;
+  --bg-2: #0d1428;
+  --card: #111a33;
+  --card-2: #16203f;
+  --line: rgba(120, 150, 205, .16);
+  --text: #e6edf7;
+  --text-2: #8fa2c4;
+  --text-3: #5c6d91;
+  --accent: #38bdf8;
+  --accent-2: #4cc3ff;
+  --ok: #34d399;
+  --warn: #fbbf24;
+  --radius: 14px;
+  --maxw: 1240px;
+  --ease: cubic-bezier(.22, 1, .36, 1);
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  background: var(--bg); color: var(--text);
+  font-family: "Noto Sans SC", "Microsoft YaHei", "PingFang SC", sans-serif;
+  font-size: 14px; line-height: 1.7; -webkit-font-smoothing: antialiased; overflow-x: hidden;
+}
+a { color: inherit; text-decoration: none; }
+img { display: block; max-width: 100%; }
+button { font-family: inherit; cursor: pointer; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+body::before {
+  content: ""; position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  background:
+    radial-gradient(1100px 600px at 18% -8%, rgba(56,189,248,.1), transparent 60%),
+    radial-gradient(900px 520px at 90% 108%, rgba(76,195,255,.08), transparent 60%),
+    repeating-linear-gradient(0deg, transparent 0 47px, rgba(120,150,205,.04) 47px 48px),
+    repeating-linear-gradient(90deg, transparent 0 47px, rgba(120,150,205,.04) 47px 48px);
+}
+.wrap { max-width: var(--maxw); margin: 0 auto; padding: 0 24px; position: relative; z-index: 1; }
+section { position: relative; z-index: 1; }
+
+/* 导航 */
+.nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 50;
+  height: 62px; display: flex; align-items: center; justify-content: space-between;
+  background: rgba(10, 15, 30, .86); border-bottom: 1px solid var(--line);
+  padding: 0 28px;
+}
+.nav-logo { display: flex; align-items: center; gap: 12px; font-weight: 900; letter-spacing: .02em; }
+.nav-logo .mark { width: 30px; height: 30px; border-radius: 8px; background: linear-gradient(135deg, var(--accent), var(--accent-2)); color: #06121f; display: grid; place-items: center; font-size: 13px; font-weight: 900; }
+.nav-logo .mono { font-family: "JetBrains Mono", monospace; font-size: 11px; color: var(--text-3); font-weight: 500; margin-top: 2px; display: block; letter-spacing: .1em; }
+.nav-links { display: flex; align-items: center; gap: 4px; }
+.nav-link { border: 0; background: none; color: var(--text-2); font-size: 13.5px; padding: 8px 14px; border-radius: 8px; transition: color .2s, background .2s; }
+.nav-link:hover { color: var(--text); background: rgba(120,150,205,.1); }
+.nav-preview { font-family: "JetBrains Mono", monospace; font-size: 11px; color: var(--accent); border: 1px solid rgba(56,189,248,.4); padding: 3px 10px; border-radius: 999px; margin-left: 10px; }
+
+/* Hero：驾驶舱头 */
+.hero { padding: 122px 0 54px; }
+.hero-inner { display: flex; align-items: flex-end; justify-content: space-between; gap: 24px; flex-wrap: wrap; }
+.hero h1 { font-size: clamp(30px, 4.6vw, 52px); font-weight: 900; letter-spacing: .01em; line-height: 1.2; }
+.hero h1 em { font-style: normal; color: var(--accent); }
+.hero .status { display: flex; align-items: center; gap: 8px; color: var(--ok); font-size: 13px; margin-top: 12px; }
+.hero .status .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--ok); box-shadow: 0 0 10px rgba(52,211,153,.8); animation: pulse 2s ease-in-out infinite; }
+@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: .35; } }
+.hero-cta { display: flex; gap: 12px; }
+.btn { display: inline-flex; align-items: center; gap: 8px; padding: 11px 22px; border-radius: 10px; font-size: 14px; font-weight: 700; border: 1px solid transparent; transition: transform .2s var(--ease), box-shadow .2s, background .2s, color .2s; }
+.btn-primary { background: linear-gradient(135deg, var(--accent), var(--accent-2)); color: #06121f; }
+.btn-primary:hover { transform: translateY(-2px); box-shadow: 0 12px 28px rgba(56,189,248,.3); }
+.btn-ghost { border-color: var(--line); color: var(--text-2); background: rgba(120,150,205,.06); }
+.btn-ghost:hover { border-color: rgba(56,189,248,.5); color: var(--accent); transform: translateY(-2px); }
+
+/* 数据总览 */
+.kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-top: 40px; }
+.kpi { border-radius: var(--radius); background: var(--card); border: 1px solid var(--line); padding: 22px 22px 18px; position: relative; overflow: hidden; }
+.kpi::after { content: ""; position: absolute; right: -40px; top: -40px; width: 120px; height: 120px; border-radius: 50%; background: radial-gradient(circle, rgba(56,189,248,.14), transparent 70%); }
+.kpi .lab { font-size: 12.5px; color: var(--text-2); display: flex; align-items: center; gap: 7px; }
+.kpi .lab .ico { width: 6px; height: 6px; border-radius: 2px; background: var(--accent); }
+.kpi .num { font-size: clamp(26px, 3vw, 36px); font-weight: 900; font-variant-numeric: tabular-nums; margin: 8px 0 4px; letter-spacing: .01em; }
+.kpi .num em { font-style: normal; font-size: .62em; color: var(--text-3); font-weight: 700; }
+.kpi .trend { font-size: 12px; color: var(--ok); font-variant-numeric: tabular-nums; }
+.kpi .trend.down { color: var(--warn); }
+.kpi .trend i { font-style: normal; margin-right: 4px; }
+
+/* 驾驶舱中部 */
+.cockpit { display: grid; grid-template-columns: 2fr 1fr; gap: 16px; margin-top: 16px; }
+.panel { border-radius: var(--radius); background: var(--card); border: 1px solid var(--line); overflow: hidden; }
+.panel-head { display: flex; align-items: center; justify-content: space-between; padding: 14px 20px; border-bottom: 1px solid var(--line); }
+.panel-head h3 { font-size: 15px; font-weight: 700; display: flex; align-items: center; gap: 10px; }
+.panel-head .tag { font-size: 11px; color: var(--text-3); font-family: "JetBrains Mono", monospace; }
+.panel-head .legend { display: flex; gap: 16px; font-size: 12px; color: var(--text-2); }
+.panel-head .legend i { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 6px; vertical-align: -1px; }
+.chart-box { padding: 8px 12px 10px; }
+#trendChart { width: 100%; height: 320px; }
+
+/* 实时对局流 */
+.stream-list { padding: 8px 18px 16px; max-height: 352px; overflow: hidden; display: flex; flex-direction: column; }
+.stream-row { display: grid; grid-template-columns: 30px 1fr auto; gap: 12px; align-items: center; padding: 11px 0; border-bottom: 1px dashed var(--line); font-size: 13px; animation: rowIn .45s var(--ease); }
+@keyframes rowIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: none; } }
+.stream-row:last-child { border-bottom: 0; }
+.s-ava { width: 30px; height: 30px; border-radius: 50%; background: linear-gradient(135deg, var(--accent), var(--accent-2)); color: #06121f; font-size: 12px; font-weight: 900; display: grid; place-items: center; }
+.s-txt b { color: var(--text); font-weight: 700; }
+.s-txt span { color: var(--text-2); margin-left: 6px; }
+.s-txt .act { color: var(--accent); margin-left: 6px; }
+.s-time { font-family: "JetBrains Mono", monospace; font-size: 11.5px; color: var(--text-3); }
+.stream-more { margin: 0 18px 14px; }
+.stream-more .btn { width: 100%; justify-content: center; background: rgba(120,150,205,.07); border-color: var(--line); color: var(--text-2); }
+.stream-more .btn:hover { color: var(--accent); border-color: rgba(56,189,248,.5); }
+
+/* 下部：分布 + 排行 */
+.lower { display: grid; grid-template-columns: 1fr 1.4fr; gap: 16px; margin-top: 16px; }
+#pieChart { width: 100%; height: 300px; }
+.rank-panel .rank-ol { padding: 6px 20px 16px; }
+.rank-li { display: grid; grid-template-columns: 34px 1fr auto auto; gap: 14px; align-items: center; padding: 12px 0; border-bottom: 1px dashed var(--line); }
+.rank-li:last-child { border-bottom: 0; }
+.rank-li .no { font-family: "JetBrains Mono", monospace; font-weight: 700; color: var(--text-3); font-variant-numeric: tabular-nums; }
+.rank-li:first-child .no { color: var(--accent); }
+.rank-li b { font-size: 14.5px; font-weight: 700; }
+.rank-li .cnt { font-size: 12.5px; color: var(--text-2); font-variant-numeric: tabular-nums; }
+.rank-li .bar { width: 92px; height: 5px; border-radius: 5px; background: rgba(120,150,205,.12); overflow: hidden; }
+.rank-li .bar i { display: block; height: 100%; border-radius: 5px; background: linear-gradient(90deg, var(--accent-2), var(--accent)); }
+
+/* 页脚 */
+.foot { border-top: 1px solid var(--line); padding: 44px 0 32px; color: var(--text-3); font-size: 13px; position: relative; z-index: 1; }
+.foot-in { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.foot .tag { color: var(--accent); border: 1px solid rgba(56,189,248,.35); border-radius: 999px; padding: 2px 10px; font-size: 11px; }
+
+/* Toast */
+.toast {
+  position: fixed; left: 50%; bottom: 40px; transform: translate(-50%, 80px);
+  background: var(--card-2); border: 1px solid rgba(56,189,248,.4); color: var(--text);
+  padding: 12px 22px; border-radius: 10px; font-size: 14px; opacity: 0;
+  transition: transform .4s var(--ease), opacity .4s; z-index: 99; pointer-events: none;
+}
+.toast.show { transform: translate(-50%, 0); opacity: 1; }
+
+/* 响应式 */
+@media (max-width: 1020px) {
+  .cockpit, .lower { grid-template-columns: 1fr; }
+  .kpis { grid-template-columns: repeat(2, 1fr); }
+  .stream-list { max-height: 300px; }
+}
+@media (max-width: 640px) {
+  .nav { padding: 0 14px; }
+  .nav-links .nav-link { display: none; }
+  .nav-preview { display: none; }
+  .hero { padding-top: 96px; }
+  .kpis { grid-template-columns: 1fr 1fr; gap: 12px; }
+  .kpi { padding: 16px; }
+  .rank-li .bar { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+  .hero .status .dot { animation: none; opacity: 1; }
+}
+</style>
+</head>
+<body>
+
+<!-- ===== 导航 ===== -->
+<nav class="nav">
+  <a class="nav-logo" href="#top" data-toast>
+    <span class="mark">GR</span>
+    <span>游戏对局记录<small class="mono">REALTIME DATA CENTER</small></span>
+  </a>
+  <div class="nav-links">
+    <button class="nav-link" data-toast>全部对局</button>
+    <button class="nav-link" data-toast>上传对局</button>
+    <button class="nav-link" data-toast>个人中心</button>
+    <span class="nav-preview">方案D预览</span>
+  </div>
+</nav>
+
+<!-- ===== Hero / 数据总览 ===== -->
+<header class="hero" id="top">
+  <div class="wrap">
+    <div class="hero-inner">
+      <div>
+        <h1>对局数据，<em>一屏尽览</em></h1>
+        <div class="status"><span class="dot"></span>数据实时更新中 · 最后同步 12 秒前</div>
+      </div>
+      <div class="hero-cta">
+        <button class="btn btn-primary" data-toast>进入对局库</button>
+        <button class="btn btn-ghost" data-toast>上传对局</button>
+      </div>
+    </div>
+    <div class="kpis">
+      <div class="kpi"><div class="lab"><span class="ico"></span>已上传对局</div><div class="num"><span data-count="12846">0</span><em> 局</em></div><div class="trend"><i>▲</i>+328 本周</div></div>
+      <div class="kpi"><div class="lab"><span class="ico" style="background:var(--accent-2)"></span>累计点赞</div><div class="num"><span data-count="36520">0</span><em> 次</em></div><div class="trend"><i>▲</i>+2,140 本周</div></div>
+      <div class="kpi"><div class="lab"><span class="ico" style="background:var(--ok)"></span>累计评论</div><div class="num"><span data-count="8214">0</span><em> 条</em></div><div class="trend"><i>▲</i>+486 本周</div></div>
+      <div class="kpi"><div class="lab"><span class="ico" style="background:var(--warn)"></span>注册玩家</div><div class="num"><span data-count="3109">0</span><em> 位</em></div><div class="trend down"><i>▲</i>+96 本周</div></div>
+    </div>
+  </div>
+</header>
+
+<!-- ===== 驾驶舱中部 ===== -->
+<section class="wrap">
+  <div class="cockpit">
+    <div class="panel">
+      <div class="panel-head">
+        <h3>近 14 天热度趋势</h3>
+        <div class="legend"><span><i style="background:var(--accent)"></i>新增对局</span><span><i style="background:var(--accent-2)"></i>新增点赞</span></div>
+      </div>
+      <div class="chart-box"><div id="trendChart"></div></div>
+    </div>
+    <div class="panel">
+      <div class="panel-head">
+        <h3>实时对局流</h3>
+        <span class="tag">LIVE</span>
+      </div>
+      <div class="stream-list" id="streamList"></div>
+      <div class="stream-more"><button class="btn" data-toast>查看全部动态</button></div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 下部 ===== -->
+<section class="wrap">
+  <div class="lower">
+    <div class="panel">
+      <div class="panel-head"><h3>游戏分布</h3><span class="tag">BY GAME</span></div>
+      <div class="chart-box"><div id="pieChart"></div></div>
+    </div>
+    <div class="panel rank-panel">
+      <div class="panel-head"><h3>热门游戏排行</h3><span class="tag">TOP 5</span></div>
+      <div class="rank-ol">
+        <div class="rank-li"><span class="no">01</span><b>三角洲行动</b><span class="cnt">4,382 局</span><span class="bar"><i style="width:100%"></i></span></div>
+        <div class="rank-li"><span class="no">02</span><b>英雄联盟</b><span class="cnt">3,215 局</span><span class="bar"><i style="width:73%"></i></span></div>
+        <div class="rank-li"><span class="no">03</span><b>王者荣耀</b><span class="cnt">2,690 局</span><span class="bar"><i style="width:61%"></i></span></div>
+        <div class="rank-li"><span class="no">04</span><b>无畏契约</b><span class="cnt">1,847 局</span><span class="bar"><i style="width:42%"></i></span></div>
+        <div class="rank-li"><span class="no">05</span><b>和平精英</b><span class="cnt">1,206 局</span><span class="bar"><i style="width:27%"></i></span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 页脚 ===== -->
+<footer class="foot">
+  <div class="wrap">
+    <div class="foot-in">
+      <span>© 2026 游戏对局记录 · 毕业设计项目 · 数据为演示示例</span>
+      <span class="tag">方案D · 数据驾驶舱 · 预览版</span>
+    </div>
+  </div>
+</footer>
+
+<div class="toast" id="toast">演示预览：该入口将在正式版中生效</div>
+
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+<script>
+(function () {
+  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* 数字递增 */
+  function animateCount(el, target, dur) {
+    var t0 = performance.now();
+    function step(t) {
+      var p = Math.min(1, (t - t0) / dur);
+      var ease = 1 - Math.pow(1 - p, 3);
+      el.textContent = Math.round(target * ease).toLocaleString('en-US');
+      if (p < 1) requestAnimationFrame(step);
+    }
+    requestAnimationFrame(step);
+  }
+  document.querySelectorAll('[data-count]').forEach(function (el) {
+    var target = parseInt(el.getAttribute('data-count'), 10);
+    if (reduce) { el.textContent = target.toLocaleString('en-US'); }
+    else { animateCount(el, target, 1300); }
+  });
+
+  var axisLabel = { color: '#5c6d91', fontSize: 11 };
+  var splitLine = { lineStyle: { color: 'rgba(120,150,205,.12)' } };
+
+  /* 趋势折线 */
+  var trendEl = document.getElementById('trendChart');
+  var trend = echarts.init(trendEl);
+  var days = ['10/01','10/02','10/03','10/04','10/05','10/06','10/07','10/08','10/09','10/10','10/11','10/12','10/13','10/14'];
+  var uploads = [280, 305, 342, 318, 396, 421, 388, 452, 470, 445, 512, 536, 508, 562];
+  var likes = [620, 680, 720, 690, 840, 910, 865, 980, 1020, 990, 1130, 1180, 1090, 1240];
+  trend.setOption({
+    animation: !reduce,
+    animationDuration: 1200,
+    backgroundColor: 'transparent',
+    grid: { left: 46, right: 20, top: 28, bottom: 30 },
+    tooltip: { trigger: 'axis', backgroundColor: '#16203f', borderColor: 'rgba(56,189,248,.4)', textStyle: { color: '#e6edf7', fontSize: 12 } },
+    xAxis: { type: 'category', data: days, axisLine: { lineStyle: { color: 'rgba(120,150,205,.25)' } }, axisLabel: axisLabel, axisTick: { show: false } },
+    yAxis: { type: 'value', axisLabel: axisLabel, splitLine: splitLine },
+    series: [
+      { name: '新增对局', type: 'line', smooth: true, symbol: 'none', data: uploads,
+        lineStyle: { width: 2.5, color: '#38bdf8' },
+        areaStyle: { color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [{ offset: 0, color: 'rgba(56,189,248,.28)' }, { offset: 1, color: 'rgba(56,189,248,0)' }]) } },
+      { name: '新增点赞', type: 'line', smooth: true, symbol: 'none', data: likes,
+        lineStyle: { width: 2.5, color: '#4cc3ff' },
+        areaStyle: { color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [{ offset: 0, color: 'rgba(76,195,255,.2)' }, { offset: 1, color: 'rgba(76,195,255,0)' }]) } }
+    ]
+  });
+
+  /* 分布环形 */
+  var pieEl = document.getElementById('pieChart');
+  var pie = echarts.init(pieEl);
+  pie.setOption({
+    animation: !reduce,
+    animationDuration: 1200,
+    backgroundColor: 'transparent',
+    tooltip: { trigger: 'item', backgroundColor: '#16203f', borderColor: 'rgba(56,189,248,.4)', textStyle: { color: '#e6edf7', fontSize: 12 } },
+    legend: { bottom: 0, textStyle: { color: '#8fa2c4', fontSize: 11 }, itemWidth: 12, itemHeight: 12 },
+    series: [{
+      type: 'pie', radius: ['46%', '72%'], center: ['50%', '44%'],
+      itemStyle: { borderRadius: 6, borderColor: '#111a33', borderWidth: 3 },
+      label: { show: false },
+      data: [
+        { value: 4382, name: '三角洲行动', itemStyle: { color: '#38bdf8' } },
+        { value: 3215, name: '英雄联盟', itemStyle: { color: '#4cc3ff' } },
+        { value: 2690, name: '王者荣耀', itemStyle: { color: '#8fa2c4' } },
+        { value: 1847, name: '无畏契约', itemStyle: { color: '#fbbf24' } },
+        { value: 1206, name: '和平精英', itemStyle: { color: '#34d399' } }
+      ]
+    }]
+  });
+
+  window.addEventListener('resize', function () { trend.resize(); pie.resize(); });
+
+  /* 实时对局流：模拟滚动 */
+  var pool = [
+    ['player1', '上传了对局', '三角洲行动 · 烽火地带'],
+    ['tester01', '点赞了', '《寒夜挽歌》'],
+    ['admin2', '评论了', '《废墟防线》'],
+    ['player1', '上传了对局', '英雄联盟 · 峡谷巅峰'],
+    ['nightowl', '点赞了', '《桥头对狙》'],
+    ['wanderer', '评论了', '《残局一打三》'],
+    ['tester01', '上传了对局', '无畏契约 · 爆能决胜'],
+    ['admin2', '点赞了', '《红隼桥高光》']
+  ];
+  var streamList = document.getElementById('streamList');
+  var timeBase = 60; /* 秒前 */
+  function fmt(n) {
+    if (n < 60) return n + '秒前';
+    var m = Math.floor(n / 60);
+    return m + '分钟前';
+  }
+  function makeRow(p, idx) {
+    var row = document.createElement('div');
+    row.className = 'stream-row';
+    var ava = p[0].charAt(0).toUpperCase();
+    row.innerHTML = '<span class="s-ava">' + ava + '</span>' +
+      '<span class="s-txt"><b>' + p[0] + '</b><span>' + p[1] + '</span><span class="act">' + p[2] + '</span></span>' +
+      '<span class="s-time">' + fmt(idx) + '</span>';
+    return row;
+  }
+  function initRows() {
+    var html = '';
+    for (var i = 0; i < pool.length; i++) {
+      html += '<div class="stream-row"><span class="s-ava">' + pool[i][0].charAt(0).toUpperCase() + '</span>' +
+        '<span class="s-txt"><b>' + pool[i][0] + '</b><span>' + pool[i][1] + '</span><span class="act">' + pool[i][2] + '</span></span>' +
+        '<span class="s-time">' + fmt(i * 7 + 5) + '</span></div>';
+    }
+    streamList.innerHTML = html;
+  }
+  initRows();
+  if (!reduce) {
+    var seq = 0;
+    setInterval(function () {
+      var p = pool[seq % pool.length];
+      seq++;
+      var row = makeRow(p, 0);
+      streamList.insertBefore(row, streamList.firstChild);
+      if (streamList.children.length > 9) streamList.removeChild(streamList.lastChild);
+      /* 更新时间 */
+      Array.prototype.forEach.call(streamList.querySelectorAll('.s-time'), function (el, i) {
+        el.textContent = fmt(i * 7 + 5);
+      });
+    }, 4200);
+  }
+
+  /* Toast */
+  var toast = document.getElementById('toast');
+  var toastTimer = null;
+  function showToast() {
+    toast.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { toast.classList.remove('show'); }, 2200);
+  }
+  document.querySelectorAll('[data-toast]').forEach(function (el) {
+    el.addEventListener('click', function (e) { e.preventDefault(); showToast(); });
+  });
+})();
+</script>
+</body>
+</html>

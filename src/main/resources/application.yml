@@ -1,0 +1,45 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: game-record
+  # ===== MySQL 数据源配置 =====
+  # 使用前先执行 sql/init.sql 建库建表，并把 password 改成你自己的 MySQL 密码
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    # 支持环境变量覆盖（Docker 部署时指向宿主机 MySQL：DB_HOST=host.docker.internal）
+    url: jdbc:mysql://${DB_HOST:localhost}:${DB_PORT:3306}/${DB_NAME:game_record}?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&useSSL=false&allowPublicKeyRetrieval=true
+    username: ${DB_USERNAME:root}
+    password: ${DB_PASSWORD:123456}
+  # ===== 文件上传限制 =====
+  servlet:
+    multipart:
+      max-file-size: 500MB
+      max-request-size: 512MB
+
+# ===== MyBatis-Plus 配置 =====
+mybatis-plus:
+  configuration:
+    # 下划线转驼峰：数据库字段 create_time <-> 实体属性 createTime
+    map-underscore-to-camel-case: true
+    # 控制台打印 SQL，便于调试；上线可注释掉
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+  global-config:
+    db-config:
+      # 数据库主键自增
+      id-type: auto
+
+# ===== 文件存储目录（相对项目根目录，启动时自动创建） =====
+file:
+  upload-dir: uploads
+
+# ===== JWT 令牌配置（登录认证，无状态） =====
+# secret 建议 >= 32 字节，生产环境务必修改
+jwt:
+  secret: ${JWT_SECRET:gamerecord-jwt-secret-key-please-change-in-prod-2026}
+  expire-hours: ${JWT_EXPIRE_HOURS:168}
+
+# ===== ffmpeg 路径（视频封面抽帧用，未配置时使用系统 PATH 中的 ffmpeg） =====
+ffmpeg:
+  path: D:/soft/tools/ffmpeg/bin/ffmpeg.exe
